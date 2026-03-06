@@ -759,3 +759,5 @@ st.markdown("""
     <p>© 2024 TechLift Solutions | All Rights Reserved</p>
 </div>
 """, unsafe_allow_html=True)
+
+
