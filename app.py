@@ -320,7 +320,6 @@ USERS = {
 # LOGIN PAGE
 # ============================================================================
 def show_login():
-    # Centre the login card using columns
     _, col, _ = st.columns([1, 1.2, 1])
     with col:
         st.markdown("""
@@ -558,383 +557,153 @@ elif page == "📈 Advanced Analytics":
         "🔍 Statistics", "📋 Data Table"
     ])
 
-    dark_bg = '#0d1529'
-    text_col = '#94a3b8'
-
-    def style_ax(ax, fig):
-        fig.patch.set_facecolor(dark_bg)
-        ax.set_facecolor(dark_bg)
-        ax.tick_params(colors=text_col, labelsize=10)
-        ax.xaxis.label.set_color(text_col)
-        ax.yaxis.label.set_color(text_col)
-        ax.title.set_color('#e2e8f0')
-        for spine in ax.spines.values():
-            spine.set_edgecolor('rgba(255,255,255,0.08)')
-        ax.grid(True, alpha=0.08, color='white')
-
     with tab1:
         st.subheader("Vibration Time Series with Thresholds")
         fig, ax = plt.subplots(figsize=(14, 6))
         ax.plot(filtered_df['ID'], filtered_df['vibration'], linewidth=2,
                 color='#4f8ef7', label='Vibration Level', alpha=0.9)
-        ax.axhline(y=mean_vib,           color='#10b981', linestyle='--', linewidth=1.8,
-                   label=f'Average: {mean_vib:.2f}', alpha=0.8)
-        ax.axhline(y=healthy_threshold,  color='#f59e0b', linestyle='--', linewidth=1.8,
-                   label=f'Action: {healthy_threshold:.2f}', alpha=0.8)
-        ax.axhline(y=critical_threshold, color='#ef4444', linestyle='--', linewidth=1.8,
-                   label=f'Critical: {critical_threshold:.2f}', alpha=0.8)
-        ax.fill_between(filtered_df['ID'], healthy_threshold, critical_threshold,
-                        alpha=0.12, color='#f59e0b', label='Maintenance Zone')
-        ax.fill_between(filtered_df['ID'], critical_threshold, filtered_df['vibration'].max(),
-                        alpha=0.12, color='#ef4444', label='Critical Zone')
+        ax.axhline(y=mean_vib, color='#10b981', linestyle='--', linewidth=1.8, label=f'Avg: {mean_vib:.2f}', alpha=0.8)
+        ax.axhline(y=healthy_threshold, color='#f59e0b', linestyle='--', linewidth=1.8, label=f'Action: {healthy_threshold:.2f}', alpha=0.8)
+        ax.axhline(y=critical_threshold, color='#ef4444', linestyle='--', linewidth=1.8, label=f'Critical: {critical_threshold:.2f}', alpha=0.8)
         ax.set_xlabel('Sample Index', fontsize=11, fontweight='bold')
         ax.set_ylabel('Vibration Level', fontsize=11, fontweight='bold')
-        ax.set_title('Vibration Trends with Action Thresholds', fontsize=13, fontweight='bold')
-        legend = ax.legend(loc='upper right', facecolor='#111827', edgecolor='#334155',
-                           labelcolor='#94a3b8')
-        style_ax(ax, fig)
-        plt.tight_layout()
+        ax.set_title('Vibration Trends', fontsize=13, fontweight='bold')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
         st.pyplot(fig)
-        st.info(f"📊 Showing {len(filtered_df):,} of {len(df):,} total readings")
 
     with tab2:
         st.subheader("Distribution Analysis")
         col1, col2 = st.columns(2)
         with col1:
             fig, ax = plt.subplots()
-            ax.hist(filtered_df['humidity'], bins=25, color='#4f8ef7', edgecolor='#0d1529', alpha=0.85)
-            ax.axvline(filtered_df['humidity'].mean(), color='#ef4444', linestyle='--',
-                       linewidth=2, label=f'Mean: {filtered_df["humidity"].mean():.1f}%')
+            ax.hist(filtered_df['humidity'], bins=25, color='#4f8ef7', edgecolor='black', alpha=0.7)
             ax.set_xlabel('Humidity (%)', fontweight='bold')
             ax.set_ylabel('Frequency', fontweight='bold')
             ax.set_title('Humidity Distribution', fontweight='bold')
-            ax.legend(facecolor='#111827', edgecolor='#334155', labelcolor='#94a3b8')
-            style_ax(ax, fig)
+            ax.grid(True, alpha=0.3)
             st.pyplot(fig)
         with col2:
             fig, ax = plt.subplots()
-            ax.hist(filtered_df['revolutions'], bins=25, color='#9b59b6', edgecolor='#0d1529', alpha=0.85)
-            ax.axvline(filtered_df['revolutions'].mean(), color='#ef4444', linestyle='--',
-                       linewidth=2, label=f'Mean: {filtered_df["revolutions"].mean():.1f}')
-            ax.set_xlabel('Door Revolutions', fontweight='bold')
+            ax.hist(filtered_df['revolutions'], bins=25, color='#9b59b6', edgecolor='black', alpha=0.7)
+            ax.set_xlabel('Revolutions', fontweight='bold')
             ax.set_ylabel('Frequency', fontweight='bold')
             ax.set_title('Door Usage Distribution', fontweight='bold')
-            ax.legend(facecolor='#111827', edgecolor='#334155', labelcolor='#94a3b8')
-            style_ax(ax, fig)
+            ax.grid(True, alpha=0.3)
             st.pyplot(fig)
 
     with tab3:
-        st.subheader("Variable Correlation Analysis")
-        numeric_cols = ['revolutions', 'humidity', 'vibration', 'x1', 'x2', 'x3', 'x4', 'x5']
-        corr_matrix  = filtered_df[numeric_cols].corr()
+        st.subheader("Correlation Analysis")
+        cols = ['revolutions', 'humidity', 'vibration', 'x1', 'x2', 'x3', 'x4', 'x5']
         fig, ax = plt.subplots(figsize=(10, 8))
-        sns.heatmap(corr_matrix, annot=True, fmt='.2f', cmap='coolwarm', center=0,
-                    ax=ax, vmin=-1, vmax=1, linewidths=0.5, linecolor='#0d1529')
-        ax.set_title('Correlation Heatmap', fontsize=13, fontweight='bold')
-        style_ax(ax, fig)
+        sns.heatmap(filtered_df[cols].corr(), annot=True, fmt='.2f', cmap='coolwarm', ax=ax)
         st.pyplot(fig)
 
     with tab4:
-        st.subheader("Statistical Summary")
-        stats_data = filtered_df[['revolutions', 'humidity', 'vibration', 'x1', 'x2', 'x3', 'x4', 'x5']].describe()
-        st.dataframe(stats_data.round(3), use_container_width=True)
-        st.subheader("Percentile Analysis")
-        percentiles = filtered_df['vibration'].quantile([0.25, 0.5, 0.75, 0.9, 0.95, 0.99])
-        c1, c2, c3, c4, c5, c6 = st.columns(6)
-        with c1: st.markdown(metric_glass("25th %ile", f"{percentiles[0.25]:.2f}"), unsafe_allow_html=True)
-        with c2: st.markdown(metric_glass("50th %ile", f"{percentiles[0.5]:.2f}"),  unsafe_allow_html=True)
-        with c3: st.markdown(metric_glass("75th %ile", f"{percentiles[0.75]:.2f}"), unsafe_allow_html=True)
-        with c4: st.markdown(metric_glass("90th %ile", f"{percentiles[0.9]:.2f}"),  unsafe_allow_html=True)
-        with c5: st.markdown(metric_glass("95th %ile", f"{percentiles[0.95]:.2f}"), unsafe_allow_html=True)
-        with c6: st.markdown(metric_glass("99th %ile", f"{percentiles[0.99]:.2f}"), unsafe_allow_html=True)
+        st.subheader("Statistics")
+        cols = ['revolutions', 'humidity', 'vibration', 'x1', 'x2', 'x3', 'x4', 'x5']
+        st.dataframe(filtered_df[cols].describe().round(3))
 
     with tab5:
-        st.subheader("Detailed Data View")
-        st.dataframe(filtered_df.round(2), use_container_width=True, height=400)
+        st.subheader("Data Table")
+        st.dataframe(filtered_df.round(2), height=400)
         csv = filtered_df.to_csv(index=False)
-        st.download_button(
-            label="📥 Download as CSV",
-            data=csv,
-            file_name=f"elevator_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv"
-        )
+        st.download_button("📥 Download CSV", csv, f"elevator_{datetime.now().strftime('%Y%m%d')}.csv", "text/csv")
 
 # ============================================================================
 # PAGE 3: ML PREDICTIONS
 # ============================================================================
 elif page == "🤖 ML Predictions":
-    page_header("🤖", "ML Predictions", "Predict elevator failures before they happen")
+    page_header("🤖", "ML Predictions", "Predict failures before they happen")
 
     if not ML_AVAILABLE:
-        st.warning("⚠️ scikit-learn not installed. Run: pip install scikit-learn")
+        st.warning("⚠️ scikit-learn loading...")
     else:
-        st.subheader("📊 Failure Prediction Model")
-        X = df[['revolutions', 'humidity', 'x1', 'x2', 'x3', 'x4', 'x5']]
-        y = df['vibration']
-        model = RandomForestRegressor(n_estimators=100, random_state=42)
-        model.fit(X, y)
-
+        st.subheader("Make a Prediction")
         col1, col2 = st.columns([2, 1])
+        
         with col1:
-            st.subheader("🎯 Make a Prediction")
             ca, cb, cc = st.columns(3)
-            with ca: rev_input = st.slider("Door Revolutions", 5.0, 40.0, 20.0)
-            with cb: hum_input = st.slider("Humidity %",       30.0, 80.0, 55.0)
-            with cc: x1_input  = st.slider("Sensor x1",       75.0, 105.0, 90.0)
-
+            rev = ca.slider("Revolutions", 5.0, 40.0, 20.0)
+            hum = cb.slider("Humidity", 30.0, 80.0, 55.0)
+            x1 = cc.slider("Sensor x1", 75.0, 105.0, 90.0)
+            
             cd, ce, cf, cg = st.columns(4)
-            with cd: x2_input = st.slider("Sensor x2", 45.0, 60.0, 50.0)
-            with ce: x3_input = st.slider("Sensor x3", 70.0, 90.0, 80.0)
-            with cf: x4_input = st.slider("Sensor x4", 34.0, 47.0, 40.0)
-            with cg: x5_input = st.slider("Sensor x5", 49.0, 71.0, 60.0)
-
-            input_data = np.array([[rev_input, hum_input, x1_input, x2_input, x3_input, x4_input, x5_input]])
-            prediction = model.predict(input_data)[0]
-
-            st.markdown("---")
-            if prediction < healthy_threshold:
-                st.success(f"### ✅ Prediction: {prediction:.2f}\n**Status: HEALTHY** — No action needed")
-            elif prediction < critical_threshold:
-                st.warning(f"### ⚠️ Prediction: {prediction:.2f}\n**Status: MAINTENANCE NEEDED** — Schedule service in 2-4 weeks")
+            x2 = cd.slider("x2", 45.0, 60.0, 50.0)
+            x3 = ce.slider("x3", 70.0, 90.0, 80.0)
+            x4 = cf.slider("x4", 34.0, 47.0, 40.0)
+            x5 = cg.slider("x5", 49.0, 71.0, 60.0)
+            
+            X = df[['revolutions', 'humidity', 'x1', 'x2', 'x3', 'x4', 'x5']]
+            y = df['vibration']
+            model = RandomForestRegressor(n_estimators=100, random_state=42)
+            model.fit(X, y)
+            
+            pred = model.predict([[rev, hum, x1, x2, x3, x4, x5]])[0]
+            
+            if pred < healthy_threshold:
+                st.success(f"✅ {pred:.2f} - HEALTHY")
+            elif pred < critical_threshold:
+                st.warning(f"⚠️ {pred:.2f} - MAINTENANCE NEEDED")
             else:
-                st.error(f"### 🚨 Prediction: {prediction:.2f}\n**Status: CRITICAL** — Emergency service required!")
-
-        with col2:
-            st.subheader("📊 Feature Importance")
-            fi = pd.DataFrame({
-                'Feature':    X.columns,
-                'Importance': model.feature_importances_
-            }).sort_values('Importance', ascending=True)
-
-            dark_bg = '#0d1529'
-            fig, ax = plt.subplots(figsize=(6, 5))
-            bars = ax.barh(fi['Feature'], fi['Importance'],
-                           color=['#4f8ef7' if v > fi['Importance'].median() else '#9b59b6'
-                                  for v in fi['Importance']])
-            ax.set_xlabel('Importance', fontweight='bold')
-            ax.set_title('Feature Importance', fontweight='bold')
-            fig.patch.set_facecolor(dark_bg)
-            ax.set_facecolor(dark_bg)
-            ax.tick_params(colors='#94a3b8')
-            ax.xaxis.label.set_color('#94a3b8')
-            ax.title.set_color('#e2e8f0')
-            for spine in ax.spines.values():
-                spine.set_edgecolor('#1e293b')
-            ax.grid(True, alpha=0.08, color='white', axis='x')
-            st.pyplot(fig)
+                st.error(f"🚨 {pred:.2f} - CRITICAL")
 
 # ============================================================================
-# PAGE 4: ALERTS & WARNINGS
+# PAGE 4: ALERTS
 # ============================================================================
 elif page == "📋 Alerts & Warnings":
-    page_header("📋", "Smart Alerts & Warnings", "Real-time monitoring and intelligent alert system")
+    page_header("📋", "Alerts", "Real-time monitoring")
 
-    critical_readings = df[df['vibration'] >= critical_threshold]
-    warning_readings  = df[(df['vibration'] >= healthy_threshold) & (df['vibration'] < critical_threshold)]
-    healthy_readings  = df[df['vibration'] < healthy_threshold]
+    critical = df[df['vibration'] >= critical_threshold]
+    warning = df[(df['vibration'] >= healthy_threshold) & (df['vibration'] < critical_threshold)]
+    healthy = df[df['vibration'] < healthy_threshold]
 
-    st.subheader("🚨 Current System Status")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.markdown(f"""
-        <div class='alert-healthy'>
-            <h2 style='margin:0;'>✅ {len(healthy_readings):,}</h2>
-            <p style='margin:6px 0 0; opacity:.8;'>Healthy Readings</p>
-        </div>""", unsafe_allow_html=True)
+        st.markdown(f"<div class='alert-healthy'><h2>✅ {len(healthy):,}</h2><p>Healthy</p></div>", unsafe_allow_html=True)
     with col2:
-        st.markdown(f"""
-        <div class='alert-warning'>
-            <h2 style='margin:0;'>⚠️ {len(warning_readings):,}</h2>
-            <p style='margin:6px 0 0; opacity:.8;'>Maintenance Alerts</p>
-        </div>""", unsafe_allow_html=True)
+        st.markdown(f"<div class='alert-warning'><h2>⚠️ {len(warning):,}</h2><p>Maintenance</p></div>", unsafe_allow_html=True)
     with col3:
-        st.markdown(f"""
-        <div class='alert-critical'>
-            <h2 style='margin:0;'>🚨 {len(critical_readings):,}</h2>
-            <p style='margin:6px 0 0; opacity:.8;'>Critical Alerts</p>
-        </div>""", unsafe_allow_html=True)
-
-    st.markdown("---")
-
-    if len(critical_readings) > 0:
-        st.subheader("🚨 CRITICAL ALERTS — Immediate Action Required")
-        st.markdown(f"""
-        **{len(critical_readings)} readings with CRITICAL vibration levels detected!**
-
-        - **Average vibration:** {critical_readings['vibration'].mean():.2f}
-        - **Max vibration:** {critical_readings['vibration'].max():.2f}
-        - **Average revolutions:** {critical_readings['revolutions'].mean():.1f}
-
-        **ACTION ITEMS:**
-        1. ⚠️ Schedule immediate elevator inspection
-        2. 📞 Contact maintenance team urgently
-        3. 📋 Log incident in maintenance system
-        4. 🚫 Consider temporary service restrictions if severe
-        """)
-
-    if len(warning_readings) > 0:
-        st.subheader("⚠️ MAINTENANCE ALERTS — Schedule Service")
-        st.markdown(f"""
-        **{len(warning_readings)} readings indicating maintenance is needed**
-
-        - **Average vibration:** {warning_readings['vibration'].mean():.2f}
-        - **Range:** {warning_readings['vibration'].min():.2f} – {warning_readings['vibration'].max():.2f}
-
-        **RECOMMENDATIONS:**
-        1. 📅 Schedule preventive maintenance within 2-4 weeks
-        2. 🔍 Inspect door mechanisms and bearings
-        3. 🛢️ Consider lubrication and adjustment
-        4. 📊 Monitor trends closely
-        """)
-
-    st.success(f"✅ **{len(healthy_readings):,} readings show normal operation** — Continue regular monitoring.")
-
-    st.markdown("---")
-    st.subheader("📈 Alert Trend Over Time")
-
-    window_size   = 500
-    critical_trend, warning_trend = [], []
-    for i in range(0, len(df), window_size):
-        w = df.iloc[i:i+window_size]
-        critical_trend.append(len(w[w['vibration'] >= critical_threshold]))
-        warning_trend.append(len(w[(w['vibration'] >= healthy_threshold) & (w['vibration'] < critical_threshold)]))
-
-    dark_bg = '#0d1529'
-    fig, ax = plt.subplots(figsize=(12, 5))
-    x = range(len(critical_trend))
-    ax.plot(x, critical_trend, marker='o', linewidth=2, color='#ef4444', label='Critical')
-    ax.plot(x, warning_trend,  marker='s', linewidth=2, color='#f59e0b', label='Warning')
-    ax.fill_between(x, critical_trend, alpha=0.2, color='#ef4444')
-    ax.fill_between(x, warning_trend,  alpha=0.2, color='#f59e0b')
-    ax.set_xlabel('Time Period', fontweight='bold')
-    ax.set_ylabel('Number of Alerts', fontweight='bold')
-    ax.set_title('Alert Frequency Over Time', fontweight='bold')
-    legend = ax.legend(facecolor='#111827', edgecolor='#334155', labelcolor='#94a3b8')
-    fig.patch.set_facecolor(dark_bg)
-    ax.set_facecolor(dark_bg)
-    ax.tick_params(colors='#94a3b8')
-    ax.xaxis.label.set_color('#94a3b8')
-    ax.yaxis.label.set_color('#94a3b8')
-    ax.title.set_color('#e2e8f0')
-    for spine in ax.spines.values():
-        spine.set_edgecolor('#1e293b')
-    ax.grid(True, alpha=0.06, color='white')
-    st.pyplot(fig)
+        st.markdown(f"<div class='alert-critical'><h2>🚨 {len(critical):,}</h2><p>Critical</p></div>", unsafe_allow_html=True)
 
 # ============================================================================
 # PAGE 5: REPORT GENERATOR
 # ============================================================================
 elif page == "📑 Report Generator":
-    page_header("📑", "Report Generator", "Export comprehensive professional analysis reports")
+    page_header("📑", "Reports", "Generate analysis reports")
 
-    st.subheader("📋 Report Options")
-    report_type = st.selectbox(
-        "Select Report Type:",
-        ["Executive Summary", "Technical Analysis", "Maintenance Schedule",
-         "Financial Impact", "Comprehensive Report"]
-    )
-
-    col1, col2 = st.columns(2)
-    with col1: include_charts      = st.checkbox("Include visualizations", value=True)
-    with col2: include_predictions = st.checkbox("Include predictions", value=True)
-
-    st.markdown("---")
-    if st.button("📄 Generate Report", use_container_width=True):
-        st.success("✅ Report Generated Successfully!")
-
-        healthy_count  = len(df[df['vibration'] < healthy_threshold])
-        maint_count    = len(df[(df['vibration'] >= healthy_threshold) & (df['vibration'] < critical_threshold)])
-        critical_count = len(df[df['vibration'] >= critical_threshold])
-
-        if report_type == "Executive Summary":
-            st.markdown(f"""
-# Elevator Maintenance — Executive Summary
-
-**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  
-**Prepared by:** {st.session_state.username.capitalize()}
-
-## Key Metrics
-| Status | Count | Percentage |
-|--------|-------|------------|
-| ✅ Healthy | {healthy_count:,} | {healthy_count/len(df)*100:.1f}% |
-| ⚠️ Maintenance | {maint_count:,} | {maint_count/len(df)*100:.1f}% |
-| 🚨 Critical | {critical_count:,} | {critical_count/len(df)*100:.1f}% |
-
-## Key Findings
-- Door usage is the **PRIMARY driver** (r = 0.838)
-- High-usage elevators have **51% higher vibration**
-- Clear maintenance thresholds established
-- Predictive model achieves good accuracy
-
-## Recommendations
-1. Implement usage-based maintenance
-2. Schedule monthly service for high-traffic elevators
-3. Deploy predictive monitoring system
-4. **Expected annual savings: $12,000+ per elevator**
-            """)
-        st.info("📊 PDF download feature coming in next release")
+    report = st.selectbox("Report Type", ["Executive Summary", "Technical Analysis"])
+    
+    if st.button("Generate Report"):
+        st.success("✅ Report Generated!")
+        st.markdown(f"""
+        # Report - {report}
+        Generated: {datetime.now().strftime('%Y-%m-%d')}
+        
+        Total readings: {len(df):,}
+        Healthy: {len(df[df['vibration'] < healthy_threshold]):,}
+        """)
 
 # ============================================================================
 # PAGE 6: SETTINGS
 # ============================================================================
 elif page == "⚙️ Settings":
-    page_header("⚙️", "Dashboard Settings", "Customize your experience and notification preferences")
-
-    st.subheader("🎨 Appearance")
-    col1, col2 = st.columns(2)
-    with col1: theme      = st.radio("Theme:", ["Dark (Premium)", "Light", "Auto"])
-    with col2: chart_style = st.select_slider("Chart Detail", options=["Simple", "Normal", "Detailed"])
-
-    st.markdown("---")
-    st.subheader("🔔 Alerts & Notifications")
-    col1, col2, col3 = st.columns(3)
-    with col1: critical_alerts     = st.checkbox("Critical Alerts",     value=True)
-    with col2: maintenance_alerts  = st.checkbox("Maintenance Alerts",  value=True)
-    with col3: email_notifications = st.checkbox("Email Notifications", value=False)
-
-    st.markdown("---")
-    st.subheader("📊 Data & Analytics")
-    col1, col2 = st.columns(2)
-    with col1: update_freq  = st.select_slider("Update Frequency", options=["Real-time", "Every 5 min", "Every 30 min"])
-    with col2: data_retention = st.select_slider("Data Retention",  options=["7 days", "30 days", "90 days", "1 year"])
-
-    st.markdown("---")
-    if st.button("💾 Save Settings", use_container_width=True):
-        st.success("✅ Settings saved successfully!")
-
-    st.markdown("---")
-    st.subheader("ℹ️ About")
-
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown(metric_glass("Version", "3.0", "Premium Edition"), unsafe_allow_html=True)
-    with c2:
-        st.markdown(metric_glass("Last Updated", "Mar 2026", "by Tanmay"), unsafe_allow_html=True)
-
-    st.info("""
-    **🛗 Elevator Predictive Maintenance Dashboard v3.0**
-
-    Advanced analytics platform for elevator monitoring and predictive maintenance.
-
-    **Features:**
-    - 🔐 Secure login with session management
-    - 🌑 Premium dark glassmorphism UI
-    - 📊 Real-time sensor monitoring
-    - 🤖 ML-powered predictions
-    - 🚨 Intelligent alert system
-    - 📑 Professional report generation
-    """)
+    page_header("⚙️", "Settings", "Customize dashboard")
+    
+    st.subheader("Preferences")
+    theme = st.radio("Theme", ["Dark", "Light"])
+    alerts = st.checkbox("Enable Alerts")
+    
+    if st.button("Save"):
+        st.success("✅ Saved!")
 
 # ============================================================================
 # FOOTER
 # ============================================================================
 st.markdown("---")
 st.markdown(f"""
-<div style='text-align: center; color: #334155; font-size: 12px; padding: 12px 0;'>
-    <p>🛗 <strong>Elevator Predictive Maintenance Dashboard v3.0</strong> &nbsp;·&nbsp; Premium Edition</p>
-    <p>Logged in as <strong style='color:#4f8ef7;'>{st.session_state.username.capitalize()}</strong>
-       &nbsp;·&nbsp; © 2026 TechLift Solutions · All Rights Reserved</p>
+<div style='text-align: center; color: #334155; font-size: 12px;'>
+    <p>🛗 Elevator Dashboard v3.0 · {st.session_state.username.capitalize()} · © 2026</p>
 </div>
 """, unsafe_allow_html=True)
-
 
