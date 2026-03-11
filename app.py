@@ -1,709 +1,626 @@
 """
-🛗 ENHANCED Elevator Predictive Maintenance Dashboard v3.0
-Premium UI: Glassmorphism dark theme, Login Page, Advanced Analytics
+🏢 TechLift Elevator Monitoring System v4.0
+Ultra-premium tech-themed UI: Cyberpunk/Futuristic dark theme
 """
 
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
-from datetime import datetime, timedelta
+from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
 
-# Try importing ML library
 try:
     from sklearn.ensemble import RandomForestRegressor
-    from sklearn.preprocessing import StandardScaler
     ML_AVAILABLE = True
 except ImportError:
     ML_AVAILABLE = False
 
-# ============================================================================
-# PAGE CONFIG
-# ============================================================================
+# ── PAGE CONFIG ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="🛗 Elevator Maintenance Pro",
-    page_icon="🛗",
+    page_title="TechLift | Elevator Monitoring System",
+    page_icon="🏢",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# ============================================================================
-# PREMIUM DARK THEME CSS
-# ============================================================================
-st.markdown("""
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+# ── SESSION STATE ─────────────────────────────────────────────────────────────
+for k, v in [("logged_in", False), ("username", ""), ("theme", "dark"), ("page", "📊 Overview")]:
+    if k not in st.session_state:
+        st.session_state[k] = v
+
+USERS = {"admin": "elevate123", "tanmay": "1234", "engineer": "tech2024"}
+
+# ── THEME CSS ─────────────────────────────────────────────────────────────────
+DARK_BG  = "#020817"
+DARK_BG2 = "#0d1629"
+LIGHT_BG  = "#f0f4ff"
+LIGHT_BG2 = "#e2e8f0"
+
+def get_css(theme="dark"):
+    is_dark = theme == "dark"
+    bg        = DARK_BG if is_dark else LIGHT_BG
+    bg2       = DARK_BG2 if is_dark else LIGHT_BG2
+    text      = "#e2e8f0" if is_dark else "#0f172a"
+    text_muted= "#64748b" if is_dark else "#475569"
+    card_bg   = "rgba(255,255,255,0.04)" if is_dark else "rgba(255,255,255,0.85)"
+    card_border= "rgba(0,212,255,0.15)" if is_dark else "rgba(0,120,255,0.2)"
+    sidebar_bg = f"linear-gradient(180deg,{DARK_BG2} 0%,#090f1e 100%)" if is_dark else f"linear-gradient(180deg,{LIGHT_BG2} 0%,#dbeafe 100%)"
+    sidebar_txt= "#94a3b8" if is_dark else "#1e3a5f"
+    input_bg  = "rgba(255,255,255,0.06)" if is_dark else "rgba(255,255,255,0.9)"
+    nav_hover = "rgba(0,212,255,0.08)" if is_dark else "rgba(0,120,255,0.08)"
+
+    return f"""
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-    /* ---- BASE & FONTS ---- */
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-    }
+/* ── BASE ── */
+html,body,[class*="css"]{{font-family:'Inter',sans-serif;}}
+.stApp{{background:linear-gradient(135deg,{bg} 0%,{bg2} 50%,{bg} 100%) !important;color:{text};}}
 
-    /* ---- DARK BACKGROUND ---- */
-    .stApp {
-        background: linear-gradient(135deg, #0a0e1a 0%, #0d1529 50%, #0a0e1a 100%);
-        color: #e2e8f0;
-    }
+/* ── SIDEBAR ── */
+section[data-testid="stSidebar"]{{background:{sidebar_bg} !important;border-right:1px solid rgba(0,212,255,0.15);min-width:260px !important;}}
+section[data-testid="stSidebar"] *{{color:{sidebar_txt} !important;}}
+section[data-testid="stSidebar"] .block-container{{padding:1rem 0.8rem;}}
 
-    /* ---- SIDEBAR ---- */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0d1529 0%, #111827 100%) !important;
-        border-right: 1px solid rgba(79, 142, 247, 0.2);
-    }
-    section[data-testid="stSidebar"] .block-container {
-        padding-top: 1rem;
-    }
+/* ── HIDE DEFAULT RADIO BULLETS, replace with nav cards ── */
+div[data-testid="stRadio"]>label{{display:none;}}
+div[data-testid="stRadio"] div[role="radiogroup"]{{display:flex;flex-direction:column;gap:4px;}}
+div[data-testid="stRadio"] label{{
+  background:rgba(0,212,255,0.04);
+  border:1px solid rgba(0,212,255,0.12);
+  border-radius:10px;padding:10px 14px;
+  cursor:pointer;transition:all .25s ease;
+  font-weight:500;font-size:14px;letter-spacing:.02em;
+  display:flex !important;align-items:center;gap:8px;
+}}
+div[data-testid="stRadio"] label:hover{{background:{nav_hover};border-color:rgba(0,212,255,0.4);transform:translateX(4px);}}
+div[data-testid="stRadio"] label[data-selected="true"],
+div[data-testid="stRadio"] input:checked+div{{background:linear-gradient(90deg,rgba(0,212,255,0.18),rgba(79,142,247,0.1));border-color:#00d4ff;box-shadow:0 0 12px rgba(0,212,255,0.2);}}
 
-    /* ---- GLASS CARDS ---- */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.04);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        padding: 24px;
-        margin: 8px 0;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .glass-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 40px rgba(79, 142, 247, 0.15);
-    }
+/* ── GLASS CARDS ── */
+.glass-card{{background:{card_bg};backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid {card_border};border-radius:16px;padding:24px;margin:8px 0;transition:transform .3s,box-shadow .3s;}}
+.glass-card:hover{{transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,212,255,0.12);}}
 
-    /* ---- METRIC CARDS ---- */
-    .metric-glass {
-        background: linear-gradient(135deg, rgba(79, 142, 247, 0.12) 0%, rgba(155, 89, 182, 0.08) 100%);
-        border: 1px solid rgba(79, 142, 247, 0.25);
-        border-radius: 14px;
-        padding: 20px 24px;
-        text-align: center;
-        transition: all 0.3s ease;
-    }
-    .metric-glass:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 28px rgba(79, 142, 247, 0.2);
-        border-color: rgba(79, 142, 247, 0.5);
-    }
-    .metric-glass .label {
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #94a3b8;
-        margin-bottom: 8px;
-    }
-    .metric-glass .value {
-        font-size: 32px;
-        font-weight: 800;
-        background: linear-gradient(135deg, #4f8ef7, #9b59b6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        line-height: 1;
-    }
-    .metric-glass .sub {
-        font-size: 11px;
-        color: #64748b;
-        margin-top: 6px;
-    }
+/* ── METRIC CARDS ── */
+.metric-glass{{background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(79,142,247,0.07));border:1px solid rgba(0,212,255,0.2);border-radius:14px;padding:20px 24px;text-align:center;transition:all .3s;}}
+.metric-glass:hover{{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,212,255,0.18);border-color:rgba(0,212,255,0.45);}}
+.metric-glass .label{{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:{text_muted};margin-bottom:8px;}}
+.metric-glass .value{{font-size:30px;font-weight:800;background:linear-gradient(135deg,#00d4ff,#4f8ef7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;}}
+.metric-glass .sub{{font-size:11px;color:{text_muted};margin-top:6px;}}
 
-    /* ---- ALERT CARDS ---- */
-    .alert-critical {
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(185, 28, 28, 0.12));
-        border: 1px solid rgba(239, 68, 68, 0.4);
-        border-left: 4px solid #ef4444;
-        padding: 20px;
-        border-radius: 12px;
-        color: #fca5a5;
-        transition: all 0.3s ease;
-    }
-    .alert-critical:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(239,68,68,0.2); }
+/* ── ALERTS ── */
+.alert-critical{{background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(185,28,28,.12));border:1px solid rgba(239,68,68,.4);border-left:4px solid #ef4444;padding:20px;border-radius:12px;color:#fca5a5;transition:all .3s;}}
+.alert-critical:hover{{transform:translateY(-2px);box-shadow:0 8px 24px rgba(239,68,68,.2);}}
+.alert-warning{{background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(180,83,9,.12));border:1px solid rgba(245,158,11,.4);border-left:4px solid #f59e0b;padding:20px;border-radius:12px;color:#fcd34d;transition:all .3s;}}
+.alert-warning:hover{{transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,158,11,.2);}}
+.alert-healthy{{background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(5,150,105,.12));border:1px solid rgba(16,185,129,.4);border-left:4px solid #10b981;padding:20px;border-radius:12px;color:#6ee7b7;transition:all .3s;}}
+.alert-healthy:hover{{transform:translateY(-2px);box-shadow:0 8px 24px rgba(16,185,129,.2);}}
 
-    .alert-warning {
-        background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(180, 83, 9, 0.12));
-        border: 1px solid rgba(245, 158, 11, 0.4);
-        border-left: 4px solid #f59e0b;
-        padding: 20px;
-        border-radius: 12px;
-        color: #fcd34d;
-        transition: all 0.3s ease;
-    }
-    .alert-warning:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,0.2); }
+/* ── PAGE HEADER ── */
+.page-header{{background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(79,142,247,0.06));border:1px solid rgba(0,212,255,0.18);border-radius:16px;padding:28px 32px;margin-bottom:24px;position:relative;overflow:hidden;}}
+.page-header::before{{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00d4ff,#4f8ef7,transparent);}}
+.page-header h1{{font-family:'Orbitron',sans-serif;font-size:24px;font-weight:700;background:linear-gradient(135deg,#00d4ff 0%,#4f8ef7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0 0 6px 0;}}
+.page-header p{{color:{text_muted};margin:0;font-size:13px;}}
 
-    .alert-healthy {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(5, 150, 105, 0.12));
-        border: 1px solid rgba(16, 185, 129, 0.4);
-        border-left: 4px solid #10b981;
-        padding: 20px;
-        border-radius: 12px;
-        color: #6ee7b7;
-        transition: all 0.3s ease;
-    }
-    .alert-healthy:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16,185,129,0.2); }
+/* ── USER BADGE ── */
+.user-badge{{background:linear-gradient(135deg,rgba(0,212,255,0.12),rgba(79,142,247,0.08));border:1px solid rgba(0,212,255,0.25);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:12px;}}
+.user-avatar{{width:40px;height:40px;background:linear-gradient(135deg,#00d4ff,#4f8ef7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#020817;flex-shrink:0;box-shadow:0 0 12px rgba(0,212,255,0.4);}}
+.user-name{{font-size:14px;font-weight:600;color:{text} !important;}}
+.user-role{{font-size:11px;color:{text_muted} !important;}}
 
-    /* ---- PAGE HEADERS ---- */
-    .page-header {
-        background: linear-gradient(135deg, rgba(79, 142, 247, 0.1) 0%, rgba(155, 89, 182, 0.08) 100%);
-        border: 1px solid rgba(79, 142, 247, 0.2);
-        border-radius: 16px;
-        padding: 28px 32px;
-        margin-bottom: 24px;
-    }
-    .page-header h1 {
-        font-size: 28px;
-        font-weight: 800;
-        background: linear-gradient(135deg, #4f8ef7 0%, #9b59b6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin: 0 0 6px 0;
-    }
-    .page-header p {
-        color: #64748b;
-        margin: 0;
-        font-size: 14px;
-    }
+/* ── BUTTONS ── */
+.stButton>button{{background:linear-gradient(135deg,#00d4ff 0%,#4f8ef7 100%) !important;color:#020817 !important;border:none !important;border-radius:10px !important;font-weight:700 !important;font-size:14px !important;padding:12px 24px !important;width:100% !important;transition:all .3s !important;letter-spacing:.04em !important;text-transform:uppercase !important;}}
+.stButton>button:hover{{transform:translateY(-2px) !important;box-shadow:0 8px 28px rgba(0,212,255,0.5) !important;}}
 
-    /* ---- USER BADGE (sidebar) ---- */
-    .user-badge {
-        background: linear-gradient(135deg, rgba(79, 142, 247, 0.15), rgba(155, 89, 182, 0.1));
-        border: 1px solid rgba(79, 142, 247, 0.3);
-        border-radius: 12px;
-        padding: 14px 16px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 16px;
-    }
-    .user-avatar {
-        width: 38px; height: 38px;
-        background: linear-gradient(135deg, #4f8ef7, #9b59b6);
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 16px; font-weight: 700; color: white;
-        flex-shrink: 0;
-    }
-    .user-info .user-name { font-size: 14px; font-weight: 600; color: #e2e8f0; }
-    .user-info .user-role { font-size: 11px; color: #64748b; }
+/* ── TEXT INPUTS ── */
+.stTextInput>div>div>input{{background:{input_bg} !important;border:1px solid rgba(0,212,255,0.3) !important;border-radius:10px !important;color:{text} !important;padding:12px 16px !important;font-size:14px !important;}}
+.stTextInput>div>div>input:focus{{border-color:#00d4ff !important;box-shadow:0 0 0 3px rgba(0,212,255,0.15) !important;}}
 
-    /* ---- LOGIN PAGE ---- */
-    .login-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 80vh;
-    }
-    .login-card {
-        background: rgba(255, 255, 255, 0.04);
-        backdrop-filter: blur(30px);
-        -webkit-backdrop-filter: blur(30px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
-        padding: 48px 40px;
-        width: 100%;
-        max-width: 420px;
-        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(79,142,247,0.1);
-    }
-    .login-title {
-        text-align: center;
-        font-size: 26px;
-        font-weight: 800;
-        background: linear-gradient(135deg, #4f8ef7 0%, #9b59b6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 6px;
-    }
-    .login-subtitle {
-        text-align: center;
-        font-size: 13px;
-        color: #64748b;
-        margin-bottom: 32px;
-    }
+/* ── TABS ── */
+.stTabs [data-baseweb="tab-list"]{{background:rgba(0,212,255,0.04) !important;border-radius:12px !important;padding:4px !important;border:1px solid rgba(0,212,255,0.1) !important;}}
+.stTabs [data-baseweb="tab"]{{border-radius:8px !important;color:{text_muted} !important;font-weight:500 !important;}}
+.stTabs [aria-selected="true"]{{background:linear-gradient(135deg,rgba(0,212,255,0.2),rgba(79,142,247,0.15)) !important;color:#00d4ff !important;}}
 
-    /* ---- STREAMLIT WIDGET OVERRIDES ---- */
-    .stTextInput > div > div > input {
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(79, 142, 247, 0.3) !important;
-        border-radius: 10px !important;
-        color: #e2e8f0 !important;
-        padding: 12px 16px !important;
-    }
-    .stTextInput > div > div > input:focus {
-        border-color: #4f8ef7 !important;
-        box-shadow: 0 0 0 3px rgba(79,142,247,0.15) !important;
-    }
-    .stButton > button {
-        background: linear-gradient(135deg, #4f8ef7 0%, #9b59b6 100%) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 10px !important;
-        font-weight: 600 !important;
-        font-size: 15px !important;
-        padding: 12px 24px !important;
-        width: 100% !important;
-        transition: all 0.3s ease !important;
-        letter-spacing: 0.02em !important;
-    }
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 24px rgba(79, 142, 247, 0.4) !important;
-        opacity: 0.95 !important;
-    }
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{{width:5px;height:5px;}}
+::-webkit-scrollbar-track{{background:rgba(0,0,0,0.1);}}
+::-webkit-scrollbar-thumb{{background:linear-gradient(135deg,#00d4ff,#4f8ef7);border-radius:3px;}}
 
-    /* ---- TABS ---- */
-    .stTabs [data-baseweb="tab-list"] {
-        background: rgba(255,255,255,0.03) !important;
-        border-radius: 12px !important;
-        padding: 4px !important;
-        border: 1px solid rgba(255,255,255,0.07) !important;
-    }
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 8px !important;
-        color: #94a3b8 !important;
-        font-weight: 500 !important;
-    }
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, rgba(79,142,247,0.2), rgba(155,89,182,0.15)) !important;
-        color: #4f8ef7 !important;
-    }
+/* ── DIVIDER ── */
+hr{{border-color:rgba(0,212,255,0.1) !important;}}
 
-    /* ---- DATAFRAME ---- */
-    .stDataFrame { border-radius: 12px; overflow: hidden; }
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp{{from{{opacity:0;transform:translateY(20px);}}to{{opacity:1;transform:translateY(0);}}}}
+.fade-up{{animation:fadeInUp .5s ease forwards;}}
+@keyframes pulseGlow{{0%,100%{{box-shadow:0 0 8px rgba(0,212,255,0.3);}}50%{{box-shadow:0 0 22px rgba(0,212,255,0.7);}}}}
+.pulse{{animation:pulseGlow 2.5s ease-in-out infinite;}}
+@keyframes scanline{{0%{{top:-10%;}}100%{{top:110%;}}}}
 
-    /* ---- DIVIDER ---- */
-    hr { border-color: rgba(255,255,255,0.07) !important; }
+/* ── LOGIN ── */
+.login-bg{{min-height:90vh;display:flex;align-items:center;justify-content:center;}}
+.login-card{{
+  background:rgba(2,8,23,0.85);
+  backdrop-filter:blur(40px);
+  -webkit-backdrop-filter:blur(40px);
+  border:1px solid rgba(0,212,255,0.25);
+  border-radius:24px;padding:48px 44px;
+  width:100%;max-width:440px;
+  box-shadow:0 32px 80px rgba(0,0,0,0.6),0 0 60px rgba(0,212,255,0.07);
+  position:relative;overflow:hidden;
+}}
+.login-card::before{{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,#00d4ff,#4f8ef7,transparent);
+}}
+.login-title{{
+  text-align:center;font-family:'Orbitron',sans-serif;
+  font-size:22px;font-weight:700;
+  background:linear-gradient(135deg,#00d4ff,#4f8ef7);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;margin-bottom:4px;
+}}
+.login-subtitle{{text-align:center;font-size:12px;color:#475569;margin-bottom:28px;letter-spacing:.06em;text-transform:uppercase;}}
+.login-icon{{text-align:center;font-size:52px;margin-bottom:12px;filter:drop-shadow(0 0 16px rgba(0,212,255,0.6));}}
+.login-features{{display:flex;justify-content:center;gap:20px;margin-top:24px;}}
+.login-feat{{text-align:center;font-size:11px;color:#334155;}}
+.login-feat .feat-icon{{font-size:20px;display:block;margin-bottom:4px;}}
+.tech-badge{{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);
+  border-radius:20px;padding:4px 12px;font-size:10px;
+  color:#00d4ff;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;
+}}
+.status-dot{{width:6px;height:6px;background:#10b981;border-radius:50%;box-shadow:0 0 6px #10b981;display:inline-block;animation:pulseGlow 1.5s infinite;}}
 
-    /* ---- SCROLLBAR ---- */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
-    ::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #4f8ef7, #9b59b6);
-        border-radius: 3px;
-    }
+/* ── NAV LABEL ── */
+.nav-section{{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#334155 !important;padding:8px 4px 4px;}}
 
-    /* ---- MATPLOTLIB CHART BACKGROUND ---- */
-    .stpyplot { border-radius: 12px; overflow: hidden; }
+/* ── SIDEBAR STAT CARDS ── */
+.sidebar-stat{{background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.12);border-radius:8px;padding:10px 12px;text-align:center;margin:4px 0;}}
+.sidebar-stat .s-val{{font-size:18px;font-weight:700;color:#00d4ff !important;}}
+.sidebar-stat .s-lbl{{font-size:10px;color:#475569 !important;text-transform:uppercase;letter-spacing:.05em;}}
 
-    /* ---- ANIMATIONS ---- */
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-up { animation: fadeInUp 0.5s ease forwards; }
+/* ── DATAFRAME ── */
+.stDataFrame{{border-radius:12px;overflow:hidden;}}
 
-    @keyframes pulse-glow {
-        0%, 100% { box-shadow: 0 0 8px rgba(79,142,247,0.3); }
-        50%       { box-shadow: 0 0 20px rgba(79,142,247,0.6); }
-    }
-    .pulse { animation: pulse-glow 2s ease-in-out infinite; }
+/* ── SELECTBOX / SLIDER ── */
+.stSelectbox>div>div{{background:{input_bg} !important;border:1px solid rgba(0,212,255,0.25) !important;border-radius:10px !important;}}
+.stSlider .rc-slider-handle{{background:#00d4ff !important;border-color:#00d4ff !important;box-shadow:0 0 8px rgba(0,212,255,0.5) !important;}}
+.stSlider .rc-slider-track{{background:linear-gradient(90deg,#00d4ff,#4f8ef7) !important;}}
+
+/* ── CHECKBOX / TOGGLE ── */
+.stCheckbox>label{{color:{text} !important;}}
 </style>
-""", unsafe_allow_html=True)
+"""
 
-# ============================================================================
-# SESSION STATE — LOGIN
-# ============================================================================
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-if "username" not in st.session_state:
-    st.session_state.username = ""
+st.markdown(get_css(st.session_state.theme), unsafe_allow_html=True)
 
-# Credentials dictionary
-USERS = {
-    "admin": "elevate123",
-    "tanmay": "1234",
-}
-
-# ============================================================================
-# LOGIN PAGE
-# ============================================================================
+# ── LOGIN PAGE ────────────────────────────────────────────────────────────────
 def show_login():
-    _, col, _ = st.columns([1, 1.2, 1])
+    st.markdown("""
+    <style>
+    section[data-testid="stSidebar"]{display:none!important;}
+    header{display:none!important;}
+    </style>""", unsafe_allow_html=True)
+
+    _, col, _ = st.columns([1, 1.1, 1])
     with col:
         st.markdown("""
-        <div style='margin-top: 60px;'>
-            <div style='text-align:center; font-size:56px; margin-bottom:8px;'>🛗</div>
-            <div class='login-title'>Elevator Maintenance Pro</div>
-            <div class='login-subtitle'>Sign in to access your dashboard</div>
+        <div style='margin-top:40px; text-align:center;'>
+            <div class='tech-badge'><span class='status-dot'></span> SYSTEM ONLINE · v4.0</div>
         </div>
+        <div class='login-icon'>🏢</div>
+        <div class='login-title'>TechLift</div>
+        <div style='text-align:center;font-size:13px;color:#64748b;margin-bottom:4px;'>Elevator Monitoring System</div>
+        <div class='login-subtitle'>⚙️ Predictive Intelligence Platform · 📊 Real-Time Analytics</div>
         """, unsafe_allow_html=True)
 
         with st.form("login_form", clear_on_submit=False):
-            username = st.text_input("👤  Username", placeholder="Enter your username")
-            password = st.text_input("🔒  Password", type="password", placeholder="Enter your password")
-            submitted = st.form_submit_button("🚀  Sign In", use_container_width=True)
-
+            username = st.text_input("👤  Username", placeholder="Enter username")
+            password = st.text_input("🔐  Password", type="password", placeholder="Enter password")
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            submitted = st.form_submit_button("⚡  ACCESS SYSTEM", use_container_width=True)
             if submitted:
                 if username in USERS and USERS[username] == password:
                     st.session_state.logged_in = True
                     st.session_state.username = username
                     st.rerun()
                 else:
-                    st.error("❌ Invalid credentials. Try: admin / elevate123")
+                    st.error("❌  Invalid credentials. Check demo accounts below.")
 
         st.markdown("""
-        <div style='text-align:center; margin-top:24px; color:#334155; font-size:12px;'>
-            Demo accounts: <code style='color:#4f8ef7;'>admin</code> / <code style='color:#4f8ef7;'>elevate123</code>
-            &nbsp;or&nbsp; <code style='color:#4f8ef7;'>tanmay</code> / <code style='color:#4f8ef7;'>1234</code>
+        <div class='login-features'>
+            <div class='login-feat'><span class='feat-icon'>🛡️</span>Secure Auth</div>
+            <div class='login-feat'><span class='feat-icon'>📡</span>Live Data</div>
+            <div class='login-feat'><span class='feat-icon'>🤖</span>AI Engine</div>
+        </div>
+        <div style='text-align:center;margin-top:20px;color:#1e293b;font-size:11px;'>
+            Demo: <code style='color:#00d4ff;'>admin</code> / <code style='color:#00d4ff;'>elevate123</code>
+            &nbsp;·&nbsp; <code style='color:#4f8ef7;'>tanmay</code> / <code style='color:#4f8ef7;'>1234</code>
         </div>
         """, unsafe_allow_html=True)
 
-# ============================================================================
-# GUARD — show login if not authenticated
-# ============================================================================
 if not st.session_state.logged_in:
     show_login()
     st.stop()
 
-# ============================================================================
-# LOAD DATA (only after login)
-# ============================================================================
+# ── LOAD DATA ──────────────────────────────────────────────────────────────────
 @st.cache_data
 def load_data():
-    df = pd.read_csv('elevator_sensor_data_cleaned.csv')
-    return df
+    return pd.read_csv('elevator_sensor_data_cleaned.csv')
 
 df = load_data()
+mean_vib       = df['vibration'].mean()
+std_vib        = df['vibration'].std()
+healthy_thr    = mean_vib + std_vib
+critical_thr   = mean_vib + 2 * std_vib
+healthy_count  = len(df[df['vibration'] < healthy_thr])
+maint_count    = len(df[(df['vibration'] >= healthy_thr) & (df['vibration'] < critical_thr)])
+critical_count = len(df[df['vibration'] >= critical_thr])
+healthy_pct    = healthy_count / len(df) * 100
 
-mean_vib = df['vibration'].mean()
-std_vib  = df['vibration'].std()
-healthy_threshold  = mean_vib + std_vib
-critical_threshold = mean_vib + 2 * std_vib
-
-# ============================================================================
-# SIDEBAR — USER BADGE + NAV
-# ============================================================================
+# ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     initials = st.session_state.username[:2].upper()
+    role     = "Administrator" if st.session_state.username == "admin" else "Senior Engineer" if st.session_state.username == "tanmay" else "Engineer"
     st.markdown(f"""
     <div class='user-badge pulse'>
         <div class='user-avatar'>{initials}</div>
-        <div class='user-info'>
+        <div>
             <div class='user-name'>{st.session_state.username.capitalize()}</div>
-            <div class='user-role'>{'Administrator' if st.session_state.username == 'admin' else 'Engineer'}</div>
+            <div class='user-role'>{role}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button("🚪  Logout"):
+    if st.button("🚪  Logout", key="logout_btn"):
         st.session_state.logged_in = False
-        st.session_state.username = ""
+        st.session_state.username  = ""
         st.rerun()
 
-    st.markdown("---")
-    st.markdown("### 🛗 Navigation")
+    st.markdown("<div class='nav-section'>⬡ Navigation</div>", unsafe_allow_html=True)
     page = st.radio(
-        "Go to:",
-        ["📊 Overview", "📈 Advanced Analytics", "🤖 ML Predictions",
-         "📋 Alerts & Warnings", "📑 Report Generator", "⚙️ Settings"],
+        "nav",
+        ["📊  Overview", "📈  Advanced Analytics", "🤖  ML Predictions",
+         "🚨  Alerts & Warnings", "📑  Report Generator", "⚙️  Settings"],
         label_visibility="collapsed"
     )
 
-    st.markdown("---")
-    st.markdown("### ⚡ Quick Stats")
-    col1, col2 = st.columns(2)
-    healthy_pct = len(df[df['vibration'] < healthy_threshold]) / len(df) * 100
-    with col1:
-        st.metric("Readings", f"{len(df):,}")
-    with col2:
-        st.metric("Healthy %", f"{healthy_pct:.1f}%")
+    st.markdown("<div class='nav-section' style='margin-top:12px;'>⬡ Quick Stats</div>", unsafe_allow_html=True)
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown(f"<div class='sidebar-stat'><div class='s-val'>{len(df):,}</div><div class='s-lbl'>Readings</div></div>", unsafe_allow_html=True)
+    with c2:
+        st.markdown(f"<div class='sidebar-stat'><div class='s-val'>{healthy_pct:.0f}%</div><div class='s-lbl'>Healthy</div></div>", unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.caption("v3.0 · Premium Edition")
+    st.markdown(f"""
+    <div style='margin-top:auto;padding-top:16px;border-top:1px solid rgba(0,212,255,0.1);'>
+        <div style='font-size:10px;color:#1e293b;text-align:center;'>
+            🏢 TechLift EMS · v4.0 · © 2026
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# ============================================================================
-# PAGE HEADER HELPER
-# ============================================================================
+# ── HELPERS ───────────────────────────────────────────────────────────────────
 def page_header(icon, title, subtitle):
     st.markdown(f"""
     <div class='page-header fade-up'>
         <h1>{icon} {title}</h1>
         <p>{subtitle}</p>
-    </div>
-    """, unsafe_allow_html=True)
+    </div>""", unsafe_allow_html=True)
 
-# ============================================================================
-# METRIC CARD HELPER
-# ============================================================================
 def metric_glass(label, value, sub=""):
-    return f"""
-    <div class='metric-glass'>
+    return f"""<div class='metric-glass'>
         <div class='label'>{label}</div>
         <div class='value'>{value}</div>
         <div class='sub'>{sub}</div>
-    </div>
-    """
+    </div>"""
 
-# ============================================================================
-# PAGE 1: OVERVIEW
-# ============================================================================
-if page == "📊 Overview":
-    page_header("📊", "System Overview", "Real-time health monitoring & advanced analytics")
+def styled_fig(fig):
+    is_dark = st.session_state.theme == "dark"
+    bg      = "#0a0e1a" if is_dark else "#f8fafc"
+    fg      = "#e2e8f0" if is_dark else "#0f172a"
+    grid    = "#1e293b" if is_dark else "#cbd5e1"
+    fig.patch.set_facecolor(bg)
+    for ax in fig.get_axes():
+        ax.set_facecolor(bg)
+        ax.tick_params(colors=fg, labelsize=9)
+        ax.xaxis.label.set_color(fg)
+        ax.yaxis.label.set_color(fg)
+        if hasattr(ax, 'title'): ax.title.set_color(fg)
+        ax.spines['bottom'].set_color(grid)
+        ax.spines['left'].set_color(grid)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.grid(True, color=grid, alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
 
-    healthy_count  = len(df[df['vibration'] < healthy_threshold])
-    maint_count    = len(df[(df['vibration'] >= healthy_threshold) & (df['vibration'] < critical_threshold)])
-    critical_count = len(df[df['vibration'] >= critical_threshold])
-    avg_cost       = (critical_count * 12000 + maint_count * 2000) / 12
+# ── PAGE 1: OVERVIEW ──────────────────────────────────────────────────────────
+if "Overview" in page:
+    page_header("📊", "System Overview", "Real-time health monitoring & predictive intelligence")
 
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.markdown(metric_glass("✅ Healthy Status", f"{healthy_count/len(df)*100:.1f}%", f"{healthy_count} readings"), unsafe_allow_html=True)
-    with c2:
-        st.markdown(metric_glass("⚠️ Maintenance", f"{maint_count/len(df)*100:.1f}%", f"{maint_count} readings"), unsafe_allow_html=True)
-    with c3:
-        st.markdown(metric_glass("🚨 Critical", f"{critical_count/len(df)*100:.1f}%", f"{critical_count} readings"), unsafe_allow_html=True)
-    with c4:
-        st.markdown(metric_glass("💰 Savings/Month", f"${avg_cost:,.0f}", "vs emergency repairs"), unsafe_allow_html=True)
+    avg_cost = (critical_count * 12000 + maint_count * 2000) / 12
+    c1,c2,c3,c4 = st.columns(4)
+    with c1: st.markdown(metric_glass("✅ Healthy Status", f"{healthy_count/len(df)*100:.1f}%", f"{healthy_count:,} readings"), unsafe_allow_html=True)
+    with c2: st.markdown(metric_glass("⚠️ Maintenance",   f"{maint_count/len(df)*100:.1f}%",   f"{maint_count:,} readings"), unsafe_allow_html=True)
+    with c3: st.markdown(metric_glass("🚨 Critical",       f"{critical_count/len(df)*100:.1f}%", f"{critical_count:,} readings"), unsafe_allow_html=True)
+    with c4: st.markdown(metric_glass("💰 Savings/Mo",     f"${avg_cost:,.0f}", "vs emergency repairs"), unsafe_allow_html=True)
 
-    st.markdown("---")
+    st.markdown("<hr>", unsafe_allow_html=True)
     st.subheader("📍 System Health Visualization")
-
-    col1, col2, col3 = st.columns(3)
+    col1,col2,col3 = st.columns(3)
     with col1:
-        st.markdown(f"""
-        <div class='alert-healthy'>
-            <h3 style='margin:0 0 6px 0;'>✅ Healthy</h3>
-            <p style='font-size: 28px; font-weight: 800; margin:0;'>{(healthy_count/len(df)*100):.1f}%</p>
-            <p style='margin:6px 0 0;font-size:13px;opacity:.8;'>Vibration &lt; {healthy_threshold:.2f}</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f"<div class='alert-healthy'><h3 style='margin:0 0 6px'>✅ Healthy</h3><p style='font-size:28px;font-weight:800;margin:0'>{healthy_count/len(df)*100:.1f}%</p><p style='margin:6px 0 0;font-size:13px;opacity:.8'>Vibration &lt; {healthy_thr:.2f}</p></div>", unsafe_allow_html=True)
     with col2:
-        st.markdown(f"""
-        <div class='alert-warning'>
-            <h3 style='margin:0 0 6px 0;'>⚠️ Maintenance</h3>
-            <p style='font-size: 28px; font-weight: 800; margin:0;'>{(maint_count/len(df)*100):.1f}%</p>
-            <p style='margin:6px 0 0;font-size:13px;opacity:.8;'>Vibration {healthy_threshold:.2f} – {critical_threshold:.2f}</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f"<div class='alert-warning'><h3 style='margin:0 0 6px'>⚠️ Maintenance</h3><p style='font-size:28px;font-weight:800;margin:0'>{maint_count/len(df)*100:.1f}%</p><p style='margin:6px 0 0;font-size:13px;opacity:.8'>Vibration {healthy_thr:.2f}–{critical_thr:.2f}</p></div>", unsafe_allow_html=True)
     with col3:
-        st.markdown(f"""
-        <div class='alert-critical'>
-            <h3 style='margin:0 0 6px 0;'>🚨 Critical</h3>
-            <p style='font-size: 28px; font-weight: 800; margin:0;'>{(critical_count/len(df)*100):.1f}%</p>
-            <p style='margin:6px 0 0;font-size:13px;opacity:.8;'>Vibration &gt; {critical_threshold:.2f}</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f"<div class='alert-critical'><h3 style='margin:0 0 6px'>🚨 Critical</h3><p style='font-size:28px;font-weight:800;margin:0'>{critical_count/len(df)*100:.1f}%</p><p style='margin:6px 0 0;font-size:13px;opacity:.8'>Vibration &gt; {critical_thr:.2f}</p></div>", unsafe_allow_html=True)
 
-    st.markdown("---")
+    st.markdown("<hr>", unsafe_allow_html=True)
     st.subheader("💡 Key Insights")
-
-    col1, col2 = st.columns(2)
+    col1,col2 = st.columns(2)
     with col1:
-        corr_rev = df['revolutions'].corr(df['vibration'])
-        st.success(f"""
-        **🚪 Door Usage Impact: r = {corr_rev:.3f}**
-
-        This is a VERY STRONG correlation!
-
-        • High-usage elevators: +51% vibration
-        • Usage is the PRIMARY driver
-        • Maintenance = usage intensity
-        """)
+        r = df['revolutions'].corr(df['vibration'])
+        st.success(f"**🚪 Door Usage Impact: r = {r:.3f}**\n\nVERY STRONG correlation\n\n• High-usage elevators: +51% vibration\n• Usage is PRIMARY driver\n• Maintenance = usage intensity")
     with col2:
-        corr_hum = df['humidity'].corr(df['vibration'])
-        st.info(f"""
-        **💨 Environmental Impact: r = {corr_hum:.3f}**
+        r2 = df['humidity'].corr(df['vibration'])
+        st.info(f"**💨 Environmental Impact: r = {r2:.3f}**\n\nWEAK correlation\n\n• Humidity has minor effect\n• Not a primary concern\n• Focus on usage-based maintenance")
 
-        This is a WEAK correlation
-
-        • Humidity has minor effect
-        • Not a primary concern
-        • Focus on usage-based maintenance
-        """)
-
-    st.markdown("---")
+    st.markdown("<hr>", unsafe_allow_html=True)
     st.subheader("💰 Financial Impact Analysis")
+    c1,c2,c3 = st.columns(3)
+    with c1: st.markdown(metric_glass("Emergency Repair",   "$12,000", "per incident"), unsafe_allow_html=True)
+    with c2: st.markdown(metric_glass("Preventive Service", "$2,000",  "per service"), unsafe_allow_html=True)
+    with c3: st.markdown(metric_glass("Break-Even",         "2 failures/yr", "$12,000 savings"), unsafe_allow_html=True)
 
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.markdown(metric_glass("Emergency Repair", "$12,000", "per incident"), unsafe_allow_html=True)
-    with c2:
-        st.markdown(metric_glass("Preventive Service", "$2,000", "per service"), unsafe_allow_html=True)
-    with c3:
-        st.markdown(metric_glass("Break-Even", "2 failures/yr", "$12,000 savings"), unsafe_allow_html=True)
-
-# ============================================================================
-# PAGE 2: ADVANCED ANALYTICS
-# ============================================================================
-elif page == "📈 Advanced Analytics":
+# ── PAGE 2: ADVANCED ANALYTICS ────────────────────────────────────────────────
+elif "Analytics" in page:
     page_header("📈", "Advanced Analytics", "Deep-dive data exploration with interactive filters")
 
-    st.subheader("🎛️ Advanced Filters")
-    col1, col2, col3 = st.columns(3)
+    st.subheader("🎛️ Data Filters")
+    col1,col2,col3 = st.columns(3)
     with col1:
-        vib_range = st.slider("Vibration Range",
-                              float(df['vibration'].min()), float(df['vibration'].max()),
+        vib_range = st.slider("Vibration Range", float(df['vibration'].min()), float(df['vibration'].max()),
                               (float(df['vibration'].min()), float(df['vibration'].max())), step=0.1)
     with col2:
-        rev_range = st.slider("Door Revolutions",
-                              float(df['revolutions'].min()), float(df['revolutions'].max()),
+        rev_range = st.slider("Door Revolutions", float(df['revolutions'].min()), float(df['revolutions'].max()),
                               (float(df['revolutions'].min()), float(df['revolutions'].max())), step=1.0)
     with col3:
-        hum_range = st.slider("Humidity %",
-                              float(df['humidity'].min()), float(df['humidity'].max()),
+        hum_range = st.slider("Humidity %", float(df['humidity'].min()), float(df['humidity'].max()),
                               (float(df['humidity'].min()), float(df['humidity'].max())), step=1.0)
 
-    filtered_df = df[
-        (df['vibration']   >= vib_range[0]) & (df['vibration']   <= vib_range[1]) &
-        (df['revolutions'] >= rev_range[0]) & (df['revolutions'] <= rev_range[1]) &
-        (df['humidity']    >= hum_range[0]) & (df['humidity']    <= hum_range[1])
-    ]
+    fdf = df[(df['vibration']>=vib_range[0])&(df['vibration']<=vib_range[1])&
+             (df['revolutions']>=rev_range[0])&(df['revolutions']<=rev_range[1])&
+             (df['humidity']>=hum_range[0])&(df['humidity']<=hum_range[1])]
 
-    st.markdown("---")
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "📊 Time Series", "📉 Distributions", "📍 Correlations",
-        "🔍 Statistics", "📋 Data Table"
-    ])
+    st.markdown(f"<div class='glass-card'><b>🔍 Filtered:</b> {len(fdf):,} / {len(df):,} readings &nbsp;|&nbsp; Healthy: {len(fdf[fdf['vibration']<healthy_thr]):,} &nbsp;|&nbsp; Critical: {len(fdf[fdf['vibration']>=critical_thr]):,}</div>", unsafe_allow_html=True)
+
+    tab1,tab2,tab3,tab4,tab5 = st.tabs(["📊 Time Series","📉 Distributions","📍 Correlations","🔍 Statistics","📋 Data Table"])
 
     with tab1:
-        st.subheader("Vibration Time Series with Thresholds")
-        fig, ax = plt.subplots(figsize=(14, 6))
-        ax.plot(filtered_df['ID'], filtered_df['vibration'], linewidth=2,
-                color='#4f8ef7', label='Vibration Level', alpha=0.9)
-        ax.axhline(y=mean_vib, color='#10b981', linestyle='--', linewidth=1.8, label=f'Avg: {mean_vib:.2f}', alpha=0.8)
-        ax.axhline(y=healthy_threshold, color='#f59e0b', linestyle='--', linewidth=1.8, label=f'Action: {healthy_threshold:.2f}', alpha=0.8)
-        ax.axhline(y=critical_threshold, color='#ef4444', linestyle='--', linewidth=1.8, label=f'Critical: {critical_threshold:.2f}', alpha=0.8)
-        ax.set_xlabel('Sample Index', fontsize=11, fontweight='bold')
-        ax.set_ylabel('Vibration Level', fontsize=11, fontweight='bold')
-        ax.set_title('Vibration Trends', fontsize=13, fontweight='bold')
-        ax.legend()
-        ax.grid(True, alpha=0.3)
-        st.pyplot(fig)
+        fig, ax = plt.subplots(figsize=(14, 5))
+        ax.plot(fdf['ID'], fdf['vibration'], linewidth=1.5, color='#00d4ff', alpha=0.9, label='Vibration')
+        ax.axhline(mean_vib,    color='#10b981', linestyle='--', linewidth=1.5, label=f'Avg: {mean_vib:.2f}')
+        ax.axhline(healthy_thr, color='#f59e0b', linestyle='--', linewidth=1.5, label=f'Action: {healthy_thr:.2f}')
+        ax.axhline(critical_thr,color='#ef4444', linestyle='--', linewidth=1.5, label=f'Critical: {critical_thr:.2f}')
+        ax.fill_between(fdf['ID'], fdf['vibration'], alpha=0.1, color='#00d4ff')
+        ax.set_xlabel('Sample Index', fontsize=10); ax.set_ylabel('Vibration', fontsize=10)
+        ax.set_title('Vibration Trends with Thresholds', fontsize=12, fontweight='bold')
+        ax.legend(facecolor='#0a0e1a', edgecolor='#1e293b', labelcolor='#e2e8f0', fontsize=9)
+        styled_fig(fig); st.pyplot(fig); plt.close()
 
     with tab2:
-        st.subheader("Distribution Analysis")
-        col1, col2 = st.columns(2)
+        col1,col2 = st.columns(2)
         with col1:
-            fig, ax = plt.subplots()
-            ax.hist(filtered_df['humidity'], bins=25, color='#4f8ef7', edgecolor='black', alpha=0.7)
-            ax.set_xlabel('Humidity (%)', fontweight='bold')
-            ax.set_ylabel('Frequency', fontweight='bold')
-            ax.set_title('Humidity Distribution', fontweight='bold')
-            ax.grid(True, alpha=0.3)
-            st.pyplot(fig)
+            fig,ax = plt.subplots()
+            ax.hist(fdf['humidity'], bins=25, color='#00d4ff', edgecolor='#020817', alpha=0.8)
+            ax.set_xlabel('Humidity (%)'); ax.set_ylabel('Frequency'); ax.set_title('Humidity Distribution')
+            styled_fig(fig); st.pyplot(fig); plt.close()
         with col2:
-            fig, ax = plt.subplots()
-            ax.hist(filtered_df['revolutions'], bins=25, color='#9b59b6', edgecolor='black', alpha=0.7)
-            ax.set_xlabel('Revolutions', fontweight='bold')
-            ax.set_ylabel('Frequency', fontweight='bold')
-            ax.set_title('Door Usage Distribution', fontweight='bold')
-            ax.grid(True, alpha=0.3)
-            st.pyplot(fig)
+            fig,ax = plt.subplots()
+            ax.hist(fdf['revolutions'], bins=25, color='#4f8ef7', edgecolor='#020817', alpha=0.8)
+            ax.set_xlabel('Revolutions'); ax.set_ylabel('Frequency'); ax.set_title('Door Usage Distribution')
+            styled_fig(fig); st.pyplot(fig); plt.close()
 
     with tab3:
-        st.subheader("Correlation Analysis")
-        cols = ['revolutions', 'humidity', 'vibration', 'x1', 'x2', 'x3', 'x4', 'x5']
-        fig, ax = plt.subplots(figsize=(10, 8))
-        sns.heatmap(filtered_df[cols].corr(), annot=True, fmt='.2f', cmap='coolwarm', ax=ax)
-        st.pyplot(fig)
+        cols = ['revolutions','humidity','vibration','x1','x2','x3','x4','x5']
+        fig,ax = plt.subplots(figsize=(10,8))
+        sns.heatmap(fdf[cols].corr(), annot=True, fmt='.2f', cmap='coolwarm', ax=ax,
+                    linecolor='#0a0e1a', linewidths=0.5)
+        styled_fig(fig); st.pyplot(fig); plt.close()
 
     with tab4:
-        st.subheader("Statistics")
-        cols = ['revolutions', 'humidity', 'vibration', 'x1', 'x2', 'x3', 'x4', 'x5']
-        st.dataframe(filtered_df[cols].describe().round(3))
+        cols = ['revolutions','humidity','vibration','x1','x2','x3','x4','x5']
+        st.dataframe(fdf[cols].describe().round(3), use_container_width=True)
 
     with tab5:
-        st.subheader("Data Table")
-        st.dataframe(filtered_df.round(2), height=400)
-        csv = filtered_df.to_csv(index=False)
-        st.download_button("📥 Download CSV", csv, f"elevator_{datetime.now().strftime('%Y%m%d')}.csv", "text/csv")
+        st.dataframe(fdf.round(2), height=400, use_container_width=True)
+        csv = fdf.to_csv(index=False)
+        st.download_button("📥  Download CSV", csv, f"elevator_{datetime.now().strftime('%Y%m%d')}.csv", "text/csv")
 
-# ============================================================================
-# PAGE 3: ML PREDICTIONS
-# ============================================================================
-elif page == "🤖 ML Predictions":
-    page_header("🤖", "ML Predictions", "Predict failures before they happen")
+# ── PAGE 3: ML PREDICTIONS ────────────────────────────────────────────────────
+elif "ML" in page:
+    page_header("🤖", "ML Predictions", "AI-powered failure prediction engine")
 
     if not ML_AVAILABLE:
-        st.warning("⚠️ scikit-learn loading...")
+        st.warning("⚠️ scikit-learn not installed. Run: pip install scikit-learn")
     else:
-        st.subheader("Make a Prediction")
-        col1, col2 = st.columns([2, 1])
-        
+        st.subheader("🎯 Configure Sensor Parameters")
+        col1,col2 = st.columns([2,1])
         with col1:
-            ca, cb, cc = st.columns(3)
-            rev = ca.slider("Revolutions", 5.0, 40.0, 20.0)
-            hum = cb.slider("Humidity", 30.0, 80.0, 55.0)
-            x1 = cc.slider("Sensor x1", 75.0, 105.0, 90.0)
-            
-            cd, ce, cf, cg = st.columns(4)
-            x2 = cd.slider("x2", 45.0, 60.0, 50.0)
-            x3 = ce.slider("x3", 70.0, 90.0, 80.0)
-            x4 = cf.slider("x4", 34.0, 47.0, 40.0)
-            x5 = cg.slider("x5", 49.0, 71.0, 60.0)
-            
-            X = df[['revolutions', 'humidity', 'x1', 'x2', 'x3', 'x4', 'x5']]
-            y = df['vibration']
-            model = RandomForestRegressor(n_estimators=100, random_state=42)
-            model.fit(X, y)
-            
-            pred = model.predict([[rev, hum, x1, x2, x3, x4, x5]])[0]
-            
-            if pred < healthy_threshold:
-                st.success(f"✅ {pred:.2f} - HEALTHY")
-            elif pred < critical_threshold:
-                st.warning(f"⚠️ {pred:.2f} - MAINTENANCE NEEDED")
+            ca,cb,cc = st.columns(3)
+            rev = ca.slider("🔄 Revolutions", 5.0, 40.0, 20.0)
+            hum = cb.slider("💧 Humidity",    30.0, 80.0, 55.0)
+            x1  = cc.slider("📡 Sensor x1",  75.0,105.0, 90.0)
+            cd,ce,cf,cg = st.columns(4)
+            x2 = cd.slider("x2", 45.0,60.0,50.0); x3 = ce.slider("x3", 70.0,90.0,80.0)
+            x4 = cf.slider("x4", 34.0,47.0,40.0); x5 = cg.slider("x5", 49.0,71.0,60.0)
+
+            @st.cache_resource
+            def train_model():
+                X = df[['revolutions','humidity','x1','x2','x3','x4','x5']]
+                y = df['vibration']
+                m = RandomForestRegressor(n_estimators=100, random_state=42)
+                m.fit(X, y)
+                return m
+
+            model = train_model()
+            pred  = model.predict([[rev,hum,x1,x2,x3,x4,x5]])[0]
+
+            st.markdown("<hr>", unsafe_allow_html=True)
+            st.subheader("📊 Prediction Result")
+            if pred < healthy_thr:
+                st.markdown(f"<div class='alert-healthy'><h2>✅ HEALTHY — {pred:.3f}</h2><p>System operating within normal parameters. No action required.</p></div>", unsafe_allow_html=True)
+            elif pred < critical_thr:
+                st.markdown(f"<div class='alert-warning'><h2>⚠️ MAINTENANCE NEEDED — {pred:.3f}</h2><p>Schedule preventive maintenance. Vibration approaching action threshold.</p></div>", unsafe_allow_html=True)
             else:
-                st.error(f"🚨 {pred:.2f} - CRITICAL")
+                st.markdown(f"<div class='alert-critical'><h2>🚨 CRITICAL — {pred:.3f}</h2><p>Immediate inspection required! Vibration exceeds critical threshold.</p></div>", unsafe_allow_html=True)
 
-# ============================================================================
-# PAGE 4: ALERTS
-# ============================================================================
-elif page == "📋 Alerts & Warnings":
-    page_header("📋", "Alerts", "Real-time monitoring")
+        with col2:
+            imp = dict(zip(['revolutions','humidity','x1','x2','x3','x4','x5'], model.feature_importances_))
+            imp_sorted = sorted(imp.items(), key=lambda x: x[1], reverse=True)
+            st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+            st.subheader("🔬 Feature Importance")
+            for feat, score in imp_sorted:
+                pct = score * 100
+                st.markdown(f"""
+                <div style='margin:8px 0;'>
+                    <div style='display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;'>
+                        <span>{feat}</span><span>{pct:.1f}%</span>
+                    </div>
+                    <div style='background:rgba(0,212,255,0.1);border-radius:4px;height:6px;'>
+                        <div style='background:linear-gradient(90deg,#00d4ff,#4f8ef7);width:{pct:.0f}%;height:100%;border-radius:4px;'></div>
+                    </div>
+                </div>""", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    critical = df[df['vibration'] >= critical_threshold]
-    warning = df[(df['vibration'] >= healthy_threshold) & (df['vibration'] < critical_threshold)]
-    healthy = df[df['vibration'] < healthy_threshold]
+# ── PAGE 4: ALERTS ────────────────────────────────────────────────────────────
+elif "Alerts" in page:
+    page_header("🚨", "Alerts & Warnings", "Real-time system health monitoring")
 
-    col1, col2, col3 = st.columns(3)
+    critical_df = df[df['vibration'] >= critical_thr]
+    warning_df  = df[(df['vibration'] >= healthy_thr) & (df['vibration'] < critical_thr)]
+    healthy_df  = df[df['vibration'] <  healthy_thr]
+
+    c1,c2,c3 = st.columns(3)
+    with c1: st.markdown(f"<div class='alert-healthy'><h2>✅ {len(healthy_df):,}</h2><p style='margin:0;font-size:14px;'>Healthy Readings</p></div>", unsafe_allow_html=True)
+    with c2: st.markdown(f"<div class='alert-warning'><h2>⚠️ {len(warning_df):,}</h2><p style='margin:0;font-size:14px;'>Need Maintenance</p></div>", unsafe_allow_html=True)
+    with c3: st.markdown(f"<div class='alert-critical'><h2>🚨 {len(critical_df):,}</h2><p style='margin:0;font-size:14px;'>Critical Alerts</p></div>", unsafe_allow_html=True)
+
+    st.markdown("<hr>", unsafe_allow_html=True)
+    tab1, tab2 = st.tabs(["🚨 Critical Records", "⚠️ Warning Records"])
+    with tab1:
+        if len(critical_df):
+            st.dataframe(critical_df.round(3), use_container_width=True, height=350)
+        else:
+            st.success("✅ No critical records found!")
+    with tab2:
+        if len(warning_df):
+            st.dataframe(warning_df.round(3), use_container_width=True, height=350)
+        else:
+            st.success("✅ No warning records found!")
+
+# ── PAGE 5: REPORT GENERATOR ──────────────────────────────────────────────────
+elif "Report" in page:
+    page_header("📑", "Report Generator", "Generate comprehensive analysis reports")
+
+    col1, col2 = st.columns([2, 1])
     with col1:
-        st.markdown(f"<div class='alert-healthy'><h2>✅ {len(healthy):,}</h2><p>Healthy</p></div>", unsafe_allow_html=True)
+        rtype = st.selectbox("Report Type", ["Executive Summary", "Technical Analysis", "Maintenance Schedule", "Cost Analysis"])
+        rdate = st.date_input("Report Date", value=datetime.now())
     with col2:
-        st.markdown(f"<div class='alert-warning'><h2>⚠️ {len(warning):,}</h2><p>Maintenance</p></div>", unsafe_allow_html=True)
-    with col3:
-        st.markdown(f"<div class='alert-critical'><h2>🚨 {len(critical):,}</h2><p>Critical</p></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
+        fmt = st.selectbox("Format", ["Markdown", "Plain Text"])
 
-# ============================================================================
-# PAGE 5: REPORT GENERATOR
-# ============================================================================
-elif page == "📑 Report Generator":
-    page_header("📑", "Reports", "Generate analysis reports")
+    if st.button("⚡  Generate Report", key="gen_report"):
+        with st.spinner("Generating report..."):
+            import time; time.sleep(0.5)
+        st.success("✅ Report Generated Successfully!")
+        c1,c2,c3 = st.columns(3)
+        with c1: st.markdown(metric_glass("Total Readings",  f"{len(df):,}", "data points"), unsafe_allow_html=True)
+        with c2: st.markdown(metric_glass("System Health",   f"{healthy_pct:.1f}%", "within normal"), unsafe_allow_html=True)
+        with c3: st.markdown(metric_glass("Critical Alerts", f"{critical_count:,}", f"{critical_count/len(df)*100:.1f}%"), unsafe_allow_html=True)
 
-    report = st.selectbox("Report Type", ["Executive Summary", "Technical Analysis"])
-    
-    if st.button("Generate Report"):
-        st.success("✅ Report Generated!")
+        report_txt = f"""# {rtype} — TechLift Elevator Monitoring
+**Generated:** {rdate.strftime('%Y-%m-%d')} | **User:** {st.session_state.username.capitalize()}
+
+## Executive Summary
+- Total sensor readings: {len(df):,}
+- Healthy readings: {healthy_count:,} ({healthy_pct:.1f}%)
+- Maintenance needed: {maint_count:,} ({maint_count/len(df)*100:.1f}%)
+- Critical alerts: {critical_count:,} ({critical_count/len(df)*100:.1f}%)
+
+## Sensor Statistics
+- Avg vibration: {mean_vib:.3f} ± {std_vib:.3f}
+- Action threshold: {healthy_thr:.3f}
+- Critical threshold: {critical_thr:.3f}
+
+## Financial Impact
+- Estimated monthly savings: ${(critical_count*12000+maint_count*2000)/12:,.0f}
+- Recommendations: Implement usage-based maintenance scheduling.
+"""
+        st.code(report_txt, language="markdown")
+        st.download_button("📥  Download Report", report_txt,
+                           f"report_{rtype.replace(' ','_').lower()}_{rdate}.md", "text/plain")
+
+# ── PAGE 6: SETTINGS ──────────────────────────────────────────────────────────
+elif "Settings" in page:
+    page_header("⚙️", "Settings", "System configuration & preferences")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+        st.subheader("🎨 Appearance")
+        theme_choice = st.radio("Interface Theme", ["dark", "light"],
+                                index=0 if st.session_state.theme == "dark" else 1,
+                                format_func=lambda x: "🌙 Dark Mode" if x == "dark" else "☀️ Light Mode")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+        st.subheader("🔔 Notifications")
+        alerts_on  = st.checkbox("Enable Critical Alerts",    value=True)
+        warn_on    = st.checkbox("Enable Warning Alerts",     value=True)
+        reports_on = st.checkbox("Enable Scheduled Reports",  value=False)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+        st.subheader("📊 Data Settings")
+        refresh = st.selectbox("Refresh Interval", ["Manual", "30 seconds", "1 minute", "5 minutes"])
+        decimals = st.slider("Decimal Precision", 1, 5, 3)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+        st.subheader("👤 Account Info")
         st.markdown(f"""
-        # Report - {report}
-        Generated: {datetime.now().strftime('%Y-%m-%d')}
-        
-        Total readings: {len(df):,}
-        Healthy: {len(df[df['vibration'] < healthy_threshold]):,}
-        """)
+        <div style='font-size:13px;'>
+            <p><b>Username:</b> {st.session_state.username.capitalize()}</p>
+            <p><b>Role:</b> {role}</p>
+            <p><b>Session:</b> Active</p>
+            <p><b>Last Login:</b> {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-# ============================================================================
-# PAGE 6: SETTINGS
-# ============================================================================
-elif page == "⚙️ Settings":
-    page_header("⚙️", "Settings", "Customize dashboard")
-    
-    st.subheader("Preferences")
-    theme = st.radio("Theme", ["Dark", "Light"])
-    alerts = st.checkbox("Enable Alerts")
-    
-    if st.button("Save"):
-        st.success("✅ Saved!")
+    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+    if st.button("💾  Save Settings", key="save_settings"):
+        st.session_state.theme = theme_choice
+        # Re-inject updated theme CSS immediately
+        st.markdown(get_css(theme_choice), unsafe_allow_html=True)
+        st.success("✅ Settings saved! Theme applied — refresh the page if colours don't update instantly.")
+        st.rerun()
 
-# ============================================================================
-# FOOTER
-# ============================================================================
+# ── FOOTER ────────────────────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown(f"""
-<div style='text-align: center; color: #334155; font-size: 12px;'>
-    <p>🛗 Elevator Dashboard v3.0 · {st.session_state.username.capitalize()} · © 2026</p>
+<div style='text-align:center;color:#1e293b;font-size:11px;padding:8px 0;'>
+    🏢 TechLift Elevator Monitoring System · v4.0 · 
+    Logged in as <b style='color:#00d4ff;'>{st.session_state.username.capitalize()}</b> · 
+    {datetime.now().strftime('%Y-%m-%d %H:%M')} · © 2026 TechLift
 </div>
 """, unsafe_allow_html=True)
-
