@@ -35,169 +35,338 @@ for k, v in [("logged_in", False), ("username", ""), ("theme", "dark"), ("page",
 
 USERS = {"admin": "elevate123", "tanmay": "1234", "engineer": "tech2024"}
 
-# ── THEME CSS ─────────────────────────────────────────────────────────────────
-DARK_BG  = "#020817"
-DARK_BG2 = "#0d1629"
-LIGHT_BG  = "#f0f4ff"
-LIGHT_BG2 = "#e2e8f0"
-
-def get_css(theme="dark"):
-    is_dark = theme == "dark"
-    bg        = DARK_BG if is_dark else LIGHT_BG
-    bg2       = DARK_BG2 if is_dark else LIGHT_BG2
-    text      = "#e2e8f0" if is_dark else "#0f172a"
-    text_muted= "#64748b" if is_dark else "#475569"
-    card_bg   = "rgba(255,255,255,0.04)" if is_dark else "rgba(255,255,255,0.85)"
-    card_border= "rgba(0,212,255,0.15)" if is_dark else "rgba(0,120,255,0.2)"
-    sidebar_bg = f"linear-gradient(180deg,{DARK_BG2} 0%,#090f1e 100%)" if is_dark else f"linear-gradient(180deg,{LIGHT_BG2} 0%,#dbeafe 100%)"
-    sidebar_txt= "#94a3b8" if is_dark else "#1e3a5f"
-    input_bg  = "rgba(255,255,255,0.06)" if is_dark else "rgba(255,255,255,0.9)"
-    nav_hover = "rgba(0,212,255,0.08)" if is_dark else "rgba(0,120,255,0.08)"
-
-    return f"""
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+# ── INJECT CSS ────────────────────────────────────────────────────────────────
+def inject_css():
+    css = """
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
 /* ── BASE ── */
-html,body,[class*="css"]{{font-family:'Inter',sans-serif;}}
-.stApp{{background:linear-gradient(135deg,{bg} 0%,{bg2} 50%,{bg} 100%) !important;color:{text};}}
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+.stApp {
+    background: linear-gradient(135deg, #020817 0%, #0d1629 50%, #020817 100%) !important;
+    color: #e2e8f0;
+}
+
+/* ── ANIMATED GRADIENT BG ── */
+.stApp::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(0,212,255,0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(79,142,247,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(139,92,246,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── HIDE STREAMLIT CHROME ── */
+#MainMenu, footer, header { visibility: hidden; }
+.block-container { padding-top: 1.5rem !important; }
 
 /* ── SIDEBAR ── */
-section[data-testid="stSidebar"]{{background:{sidebar_bg} !important;border-right:1px solid rgba(0,212,255,0.15);min-width:260px !important;}}
-section[data-testid="stSidebar"] *{{color:{sidebar_txt} !important;}}
-section[data-testid="stSidebar"] .block-container{{padding:1rem 0.8rem;}}
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0d1629 0%, #090f1e 100%) !important;
+    border-right: 1px solid rgba(0,212,255,0.15);
+    min-width: 260px !important;
+}
+section[data-testid="stSidebar"] * { color: #94a3b8 !important; }
+section[data-testid="stSidebar"] .block-container { padding: 1rem 0.8rem; }
 
-/* ── HIDE DEFAULT RADIO BULLETS, replace with nav cards ── */
-div[data-testid="stRadio"]>label{{display:none;}}
-div[data-testid="stRadio"] div[role="radiogroup"]{{display:flex;flex-direction:column;gap:4px;}}
-div[data-testid="stRadio"] label{{
-  background:rgba(0,212,255,0.04);
-  border:1px solid rgba(0,212,255,0.12);
-  border-radius:10px;padding:10px 14px;
-  cursor:pointer;transition:all .25s ease;
-  font-weight:500;font-size:14px;letter-spacing:.02em;
-  display:flex !important;align-items:center;gap:8px;
-}}
-div[data-testid="stRadio"] label:hover{{background:{nav_hover};border-color:rgba(0,212,255,0.4);transform:translateX(4px);}}
+/* ── NAV RADIO ── */
+div[data-testid="stRadio"] > label { display: none; }
+div[data-testid="stRadio"] div[role="radiogroup"] { display: flex; flex-direction: column; gap: 4px; }
+div[data-testid="stRadio"] label {
+    background: rgba(0,212,255,0.04);
+    border: 1px solid rgba(0,212,255,0.12);
+    border-radius: 10px; padding: 10px 14px;
+    cursor: pointer; transition: all .25s ease;
+    font-weight: 500; font-size: 14px; letter-spacing: .02em;
+    display: flex !important; align-items: center; gap: 8px;
+}
+div[data-testid="stRadio"] label:hover {
+    background: rgba(0,212,255,0.08);
+    border-color: rgba(0,212,255,0.4);
+    transform: translateX(4px);
+}
 div[data-testid="stRadio"] label[data-selected="true"],
-div[data-testid="stRadio"] input:checked+div{{background:linear-gradient(90deg,rgba(0,212,255,0.18),rgba(79,142,247,0.1));border-color:#00d4ff;box-shadow:0 0 12px rgba(0,212,255,0.2);}}
+div[data-testid="stRadio"] input:checked + div {
+    background: linear-gradient(90deg, rgba(0,212,255,0.18), rgba(79,142,247,0.1));
+    border-color: #00d4ff;
+    box-shadow: 0 0 12px rgba(0,212,255,0.2);
+}
 
 /* ── GLASS CARDS ── */
-.glass-card{{background:{card_bg};backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid {card_border};border-radius:16px;padding:24px;margin:8px 0;transition:transform .3s,box-shadow .3s;}}
-.glass-card:hover{{transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,212,255,0.12);}}
+.glass-card {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 16px; padding: 24px; margin: 8px 0;
+    transition: transform .3s, box-shadow .3s;
+    animation: fadeInUp .5s ease forwards;
+}
+.glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,212,255,0.12), 0 0 0 1px rgba(0,212,255,0.2);
+}
 
 /* ── METRIC CARDS ── */
-.metric-glass{{background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(79,142,247,0.07));border:1px solid rgba(0,212,255,0.2);border-radius:14px;padding:20px 24px;text-align:center;transition:all .3s;}}
-.metric-glass:hover{{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,212,255,0.18);border-color:rgba(0,212,255,0.45);}}
-.metric-glass .label{{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:{text_muted};margin-bottom:8px;}}
-.metric-glass .value{{font-size:30px;font-weight:800;background:linear-gradient(135deg,#00d4ff,#4f8ef7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;}}
-.metric-glass .sub{{font-size:11px;color:{text_muted};margin-top:6px;}}
+.metric-glass {
+    background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(79,142,247,0.07));
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 14px; padding: 20px 24px;
+    text-align: center; transition: all .3s;
+    animation: fadeInUp .5s ease forwards;
+}
+.metric-glass:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0,212,255,0.18);
+    border-color: rgba(0,212,255,0.45);
+}
+.metric-glass .label {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .1em;
+    color: #64748b; margin-bottom: 8px;
+}
+.metric-glass .value {
+    font-size: 30px; font-weight: 800;
+    background: linear-gradient(135deg, #00d4ff, #4f8ef7);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; line-height: 1.1;
+}
+.metric-glass .sub { font-size: 11px; color: #64748b; margin-top: 6px; }
 
-/* ── ALERTS ── */
-.alert-critical{{background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(185,28,28,.12));border:1px solid rgba(239,68,68,.4);border-left:4px solid #ef4444;padding:20px;border-radius:12px;color:#fca5a5;transition:all .3s;}}
-.alert-critical:hover{{transform:translateY(-2px);box-shadow:0 8px 24px rgba(239,68,68,.2);}}
-.alert-warning{{background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(180,83,9,.12));border:1px solid rgba(245,158,11,.4);border-left:4px solid #f59e0b;padding:20px;border-radius:12px;color:#fcd34d;transition:all .3s;}}
-.alert-warning:hover{{transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,158,11,.2);}}
-.alert-healthy{{background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(5,150,105,.12));border:1px solid rgba(16,185,129,.4);border-left:4px solid #10b981;padding:20px;border-radius:12px;color:#6ee7b7;transition:all .3s;}}
-.alert-healthy:hover{{transform:translateY(-2px);box-shadow:0 8px 24px rgba(16,185,129,.2);}}
+/* ── STATUS ALERTS ── */
+.alert-critical {
+    background: linear-gradient(135deg, rgba(239,68,68,.18), rgba(185,28,28,.12));
+    border: 1px solid rgba(239,68,68,.4); border-left: 4px solid #ef4444;
+    padding: 20px; border-radius: 12px; color: #fca5a5;
+    transition: all .3s; animation: fadeInUp .5s ease;
+}
+.alert-critical:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(239,68,68,.25); }
+.alert-warning {
+    background: linear-gradient(135deg, rgba(245,158,11,.18), rgba(180,83,9,.12));
+    border: 1px solid rgba(245,158,11,.4); border-left: 4px solid #f59e0b;
+    padding: 20px; border-radius: 12px; color: #fcd34d;
+    transition: all .3s; animation: fadeInUp .5s ease;
+}
+.alert-warning:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,.25); }
+.alert-healthy {
+    background: linear-gradient(135deg, rgba(16,185,129,.18), rgba(5,150,105,.12));
+    border: 1px solid rgba(16,185,129,.4); border-left: 4px solid #10b981;
+    padding: 20px; border-radius: 12px; color: #6ee7b7;
+    transition: all .3s; animation: fadeInUp .5s ease;
+}
+.alert-healthy:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16,185,129,.25); }
 
 /* ── PAGE HEADER ── */
-.page-header{{background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(79,142,247,0.06));border:1px solid rgba(0,212,255,0.18);border-radius:16px;padding:28px 32px;margin-bottom:24px;position:relative;overflow:hidden;}}
-.page-header::before{{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00d4ff,#4f8ef7,transparent);}}
-.page-header h1{{font-family:'Orbitron',sans-serif;font-size:24px;font-weight:700;background:linear-gradient(135deg,#00d4ff 0%,#4f8ef7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0 0 6px 0;}}
-.page-header p{{color:{text_muted};margin:0;font-size:13px;}}
+.page-header {
+    background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(79,142,247,0.06));
+    border: 1px solid rgba(0,212,255,0.18);
+    border-radius: 16px; padding: 28px 32px; margin-bottom: 24px;
+    position: relative; overflow: hidden;
+    animation: fadeInUp .4s ease forwards;
+}
+.page-header::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #00d4ff, #4f8ef7, transparent);
+}
+.page-header h1 {
+    font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 700;
+    background: linear-gradient(135deg, #00d4ff 0%, #4f8ef7 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin: 0 0 6px 0;
+}
+.page-header p { color: #64748b; margin: 0; font-size: 13px; }
 
 /* ── USER BADGE ── */
-.user-badge{{background:linear-gradient(135deg,rgba(0,212,255,0.12),rgba(79,142,247,0.08));border:1px solid rgba(0,212,255,0.25);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:12px;}}
-.user-avatar{{width:40px;height:40px;background:linear-gradient(135deg,#00d4ff,#4f8ef7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#020817;flex-shrink:0;box-shadow:0 0 12px rgba(0,212,255,0.4);}}
-.user-name{{font-size:14px;font-weight:600;color:{text} !important;}}
-.user-role{{font-size:11px;color:{text_muted} !important;}}
+.user-badge {
+    background: linear-gradient(135deg, rgba(0,212,255,0.12), rgba(79,142,247,0.08));
+    border: 1px solid rgba(0,212,255,0.25); border-radius: 12px;
+    padding: 14px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+}
+.user-avatar {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, #00d4ff, #4f8ef7);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; color: #020817; flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(0,212,255,0.4);
+}
+.user-name { font-size: 14px; font-weight: 600; color: #e2e8f0 !important; }
+.user-role { font-size: 11px; color: #64748b !important; }
 
 /* ── BUTTONS ── */
-.stButton>button{{background:linear-gradient(135deg,#00d4ff 0%,#4f8ef7 100%) !important;color:#020817 !important;border:none !important;border-radius:10px !important;font-weight:700 !important;font-size:14px !important;padding:12px 24px !important;width:100% !important;transition:all .3s !important;letter-spacing:.04em !important;text-transform:uppercase !important;}}
-.stButton>button:hover{{transform:translateY(-2px) !important;box-shadow:0 8px 28px rgba(0,212,255,0.5) !important;}}
+.stButton > button {
+    background: linear-gradient(135deg, #00d4ff 0%, #4f8ef7 100%) !important;
+    color: #020817 !important; border: none !important;
+    border-radius: 10px !important; font-weight: 700 !important;
+    font-size: 14px !important; padding: 12px 24px !important;
+    width: 100% !important; transition: all .3s !important;
+    letter-spacing: .04em !important; text-transform: uppercase !important;
+    box-shadow: 0 4px 15px rgba(0,212,255,0.3) !important;
+}
+.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 28px rgba(0,212,255,0.5) !important;
+}
 
 /* ── TEXT INPUTS ── */
-.stTextInput>div>div>input{{background:{input_bg} !important;border:1px solid rgba(0,212,255,0.3) !important;border-radius:10px !important;color:{text} !important;padding:12px 16px !important;font-size:14px !important;}}
-.stTextInput>div>div>input:focus{{border-color:#00d4ff !important;box-shadow:0 0 0 3px rgba(0,212,255,0.15) !important;}}
+.stTextInput > div > div > input {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(0,212,255,0.3) !important;
+    border-radius: 10px !important; color: #e2e8f0 !important;
+    padding: 12px 16px !important; font-size: 14px !important;
+}
+.stTextInput > div > div > input:focus {
+    border-color: #00d4ff !important;
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.15) !important;
+}
+
+/* ── LABELS (Fix for "etxt" / label text showing) ── */
+.stTextInput > label, .stSelectbox > label, .stSlider > label,
+.stNumberInput > label, .stDateInput > label, .stCheckbox > label,
+.stRadio > label, .stTextArea > label {
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+}
 
 /* ── TABS ── */
-.stTabs [data-baseweb="tab-list"]{{background:rgba(0,212,255,0.04) !important;border-radius:12px !important;padding:4px !important;border:1px solid rgba(0,212,255,0.1) !important;}}
-.stTabs [data-baseweb="tab"]{{border-radius:8px !important;color:{text_muted} !important;font-weight:500 !important;}}
-.stTabs [aria-selected="true"]{{background:linear-gradient(135deg,rgba(0,212,255,0.2),rgba(79,142,247,0.15)) !important;color:#00d4ff !important;}}
+.stTabs [data-baseweb="tab-list"] {
+    background: rgba(0,212,255,0.04) !important;
+    border-radius: 12px !important; padding: 4px !important;
+    border: 1px solid rgba(0,212,255,0.1) !important;
+}
+.stTabs [data-baseweb="tab"] {
+    border-radius: 8px !important; color: #64748b !important;
+    font-weight: 500 !important;
+}
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(79,142,247,0.15)) !important;
+    color: #00d4ff !important;
+}
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar{{width:5px;height:5px;}}
-::-webkit-scrollbar-track{{background:rgba(0,0,0,0.1);}}
-::-webkit-scrollbar-thumb{{background:linear-gradient(135deg,#00d4ff,#4f8ef7);border-radius:3px;}}
+/* ── SLIDERS ── */
+.stSlider > div > div > div > div {
+    background: linear-gradient(90deg, #00d4ff, #4f8ef7) !important;
+}
+.stSlider [data-testid="stThumbValue"] { color: #00d4ff !important; }
+div[data-testid="stSlider"] > div > div > div[role="slider"] {
+    background: #00d4ff !important;
+    border: 2px solid #020817 !important;
+    box-shadow: 0 0 10px rgba(0,212,255,0.6) !important;
+    width: 18px !important; height: 18px !important;
+}
 
-/* ── DIVIDER ── */
-hr{{border-color:rgba(0,212,255,0.1) !important;}}
-
-/* ── ANIMATIONS ── */
-@keyframes fadeInUp{{from{{opacity:0;transform:translateY(20px);}}to{{opacity:1;transform:translateY(0);}}}}
-.fade-up{{animation:fadeInUp .5s ease forwards;}}
-@keyframes pulseGlow{{0%,100%{{box-shadow:0 0 8px rgba(0,212,255,0.3);}}50%{{box-shadow:0 0 22px rgba(0,212,255,0.7);}}}}
-.pulse{{animation:pulseGlow 2.5s ease-in-out infinite;}}
-@keyframes scanline{{0%{{top:-10%;}}100%{{top:110%;}}}}
-
-/* ── LOGIN ── */
-.login-bg{{min-height:90vh;display:flex;align-items:center;justify-content:center;}}
-.login-card{{
-  background:rgba(2,8,23,0.85);
-  backdrop-filter:blur(40px);
-  -webkit-backdrop-filter:blur(40px);
-  border:1px solid rgba(0,212,255,0.25);
-  border-radius:24px;padding:48px 44px;
-  width:100%;max-width:440px;
-  box-shadow:0 32px 80px rgba(0,0,0,0.6),0 0 60px rgba(0,212,255,0.07);
-  position:relative;overflow:hidden;
-}}
-.login-card::before{{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,#00d4ff,#4f8ef7,transparent);
-}}
-.login-title{{
-  text-align:center;font-family:'Orbitron',sans-serif;
-  font-size:22px;font-weight:700;
-  background:linear-gradient(135deg,#00d4ff,#4f8ef7);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;margin-bottom:4px;
-}}
-.login-subtitle{{text-align:center;font-size:12px;color:#475569;margin-bottom:28px;letter-spacing:.06em;text-transform:uppercase;}}
-.login-icon{{text-align:center;font-size:52px;margin-bottom:12px;filter:drop-shadow(0 0 16px rgba(0,212,255,0.6));}}
-.login-features{{display:flex;justify-content:center;gap:20px;margin-top:24px;}}
-.login-feat{{text-align:center;font-size:11px;color:#334155;}}
-.login-feat .feat-icon{{font-size:20px;display:block;margin-bottom:4px;}}
-.tech-badge{{
-  display:inline-flex;align-items:center;gap:6px;
-  background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);
-  border-radius:20px;padding:4px 12px;font-size:10px;
-  color:#00d4ff;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;
-}}
-.status-dot{{width:6px;height:6px;background:#10b981;border-radius:50%;box-shadow:0 0 6px #10b981;display:inline-block;animation:pulseGlow 1.5s infinite;}}
-
-/* ── NAV LABEL ── */
-.nav-section{{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#334155 !important;padding:8px 4px 4px;}}
-
-/* ── SIDEBAR STAT CARDS ── */
-.sidebar-stat{{background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.12);border-radius:8px;padding:10px 12px;text-align:center;margin:4px 0;}}
-.sidebar-stat .s-val{{font-size:18px;font-weight:700;color:#00d4ff !important;}}
-.sidebar-stat .s-lbl{{font-size:10px;color:#475569 !important;text-transform:uppercase;letter-spacing:.05em;}}
+/* ── SELECTBOX ── */
+.stSelectbox > div > div {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(0,212,255,0.25) !important;
+    border-radius: 10px !important; color: #e2e8f0 !important;
+}
 
 /* ── DATAFRAME ── */
-.stDataFrame{{border-radius:12px;overflow:hidden;}}
+.stDataFrame { border-radius: 12px; overflow: hidden; }
+.stDataFrame table { background: rgba(0,0,0,0.3) !important; }
 
-/* ── SELECTBOX / SLIDER ── */
-.stSelectbox>div>div{{background:{input_bg} !important;border:1px solid rgba(0,212,255,0.25) !important;border-radius:10px !important;}}
-.stSlider .rc-slider-handle{{background:#00d4ff !important;border-color:#00d4ff !important;box-shadow:0 0 8px rgba(0,212,255,0.5) !important;}}
-.stSlider .rc-slider-track{{background:linear-gradient(90deg,#00d4ff,#4f8ef7) !important;}}
+/* ── CHECKBOX ── */
+.stCheckbox > label { color: #94a3b8 !important; }
 
-/* ── CHECKBOX / TOGGLE ── */
-.stCheckbox>label{{color:{text} !important;}}
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #00d4ff, #4f8ef7);
+    border-radius: 3px;
+}
+
+/* ── NAV LABEL ── */
+.nav-section {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .15em; color: #334155 !important; padding: 8px 4px 4px;
+}
+
+/* ── SIDEBAR STAT CARDS ── */
+.sidebar-stat {
+    background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.12);
+    border-radius: 8px; padding: 10px 12px; text-align: center; margin: 4px 0;
+}
+.sidebar-stat .s-val { font-size: 18px; font-weight: 700; color: #00d4ff !important; }
+.sidebar-stat .s-lbl { font-size: 10px; color: #475569 !important; text-transform: uppercase; letter-spacing: .05em; }
+
+/* ── DIVIDER ── */
+hr { border-color: rgba(0,212,255,0.1) !important; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0);    }
+}
+.fade-up { animation: fadeInUp .5s ease forwards; }
+
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 8px rgba(0,212,255,0.3);  }
+    50%       { box-shadow: 0 0 22px rgba(0,212,255,0.7); }
+}
+.pulse { animation: pulseGlow 2.5s ease-in-out infinite; }
+
+/* ── LOGIN ── */
+.login-bg { min-height: 90vh; display: flex; align-items: center; justify-content: center; }
+.login-card {
+    background: rgba(2,8,23,0.85);
+    backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(0,212,255,0.25); border-radius: 24px;
+    padding: 48px 44px; width: 100%; max-width: 440px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 60px rgba(0,212,255,0.07);
+    position: relative; overflow: hidden;
+}
+.login-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #00d4ff, #4f8ef7, transparent);
+}
+.login-title {
+    text-align: center; font-family: 'Orbitron', sans-serif;
+    font-size: 22px; font-weight: 700;
+    background: linear-gradient(135deg, #00d4ff, #4f8ef7);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 4px;
+}
+.login-subtitle {
+    text-align: center; font-size: 12px; color: #475569;
+    margin-bottom: 28px; letter-spacing: .06em; text-transform: uppercase;
+}
+.login-icon { text-align: center; font-size: 52px; margin-bottom: 12px; filter: drop-shadow(0 0 16px rgba(0,212,255,0.6)); }
+.login-features { display: flex; justify-content: center; gap: 20px; margin-top: 24px; }
+.login-feat { text-align: center; font-size: 11px; color: #334155; }
+.login-feat .feat-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+.tech-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 20px; padding: 4px 12px; font-size: 10px;
+    color: #00d4ff; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 16px;
+}
+.status-dot {
+    width: 6px; height: 6px; background: #10b981; border-radius: 50%;
+    box-shadow: 0 0 6px #10b981; display: inline-block; animation: pulseGlow 1.5s infinite;
+}
+
+/* ── SUBHEADERS ── */
+h2, h3 { color: #e2e8f0 !important; }
+[data-testid="stMarkdownContainer"] p { color: #94a3b8; }
+
+/* ── SUCCESS / ERROR / INFO messages ── */
+.stSuccess > div, .stInfo > div, .stWarning > div, .stError > div {
+    border-radius: 10px !important;
+    backdrop-filter: blur(10px);
+}
 </style>
 """
+    st.markdown(css, unsafe_allow_html=True)
 
-st.markdown(get_css(st.session_state.theme), unsafe_allow_html=True)
+inject_css()
 
 # ── LOGIN PAGE ────────────────────────────────────────────────────────────────
 def show_login():
@@ -321,10 +490,9 @@ def metric_glass(label, value, sub=""):
     </div>"""
 
 def styled_fig(fig):
-    is_dark = st.session_state.theme == "dark"
-    bg      = "#0a0e1a" if is_dark else "#f8fafc"
-    fg      = "#e2e8f0" if is_dark else "#0f172a"
-    grid    = "#1e293b" if is_dark else "#cbd5e1"
+    bg   = "#0a0e1a"
+    fg   = "#e2e8f0"
+    grid = "#1e293b"
     fig.patch.set_facecolor(bg)
     for ax in fig.get_axes():
         ax.set_facecolor(bg)
@@ -381,6 +549,7 @@ if "Overview" in page:
 elif "Analytics" in page:
     page_header("📈", "Advanced Analytics", "Deep-dive data exploration with interactive filters")
 
+    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
     st.subheader("🎛️ Data Filters")
     col1,col2,col3 = st.columns(3)
     with col1:
@@ -392,6 +561,7 @@ elif "Analytics" in page:
     with col3:
         hum_range = st.slider("Humidity %", float(df['humidity'].min()), float(df['humidity'].max()),
                               (float(df['humidity'].min()), float(df['humidity'].max())), step=1.0)
+    st.markdown("</div>", unsafe_allow_html=True)
 
     fdf = df[(df['vibration']>=vib_range[0])&(df['vibration']<=vib_range[1])&
              (df['revolutions']>=rev_range[0])&(df['revolutions']<=rev_range[1])&
@@ -449,6 +619,7 @@ elif "ML" in page:
     if not ML_AVAILABLE:
         st.warning("⚠️ scikit-learn not installed. Run: pip install scikit-learn")
     else:
+        st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
         st.subheader("🎯 Configure Sensor Parameters")
         col1,col2 = st.columns([2,1])
         with col1:
@@ -489,14 +660,15 @@ elif "ML" in page:
                 pct = score * 100
                 st.markdown(f"""
                 <div style='margin:8px 0;'>
-                    <div style='display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;'>
+                    <div style='display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;color:#94a3b8;'>
                         <span>{feat}</span><span>{pct:.1f}%</span>
                     </div>
                     <div style='background:rgba(0,212,255,0.1);border-radius:4px;height:6px;'>
-                        <div style='background:linear-gradient(90deg,#00d4ff,#4f8ef7);width:{pct:.0f}%;height:100%;border-radius:4px;'></div>
+                        <div style='background:linear-gradient(90deg,#00d4ff,#4f8ef7);width:{pct:.0f}%;height:100%;border-radius:4px;box-shadow:0 0 6px rgba(0,212,255,0.4);'></div>
                     </div>
                 </div>""", unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # ── PAGE 4: ALERTS ────────────────────────────────────────────────────────────
 elif "Alerts" in page:
@@ -528,6 +700,7 @@ elif "Alerts" in page:
 elif "Report" in page:
     page_header("📑", "Report Generator", "Generate comprehensive analysis reports")
 
+    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
     col1, col2 = st.columns([2, 1])
     with col1:
         rtype = st.selectbox("Report Type", ["Executive Summary", "Technical Analysis", "Maintenance Schedule", "Cost Analysis"])
@@ -535,6 +708,7 @@ elif "Report" in page:
     with col2:
         st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
         fmt = st.selectbox("Format", ["Markdown", "Plain Text"])
+    st.markdown("</div>", unsafe_allow_html=True)
 
     if st.button("⚡  Generate Report", key="gen_report"):
         with st.spinner("Generating report..."):
@@ -598,11 +772,11 @@ elif "Settings" in page:
         st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
         st.subheader("👤 Account Info")
         st.markdown(f"""
-        <div style='font-size:13px;'>
-            <p><b>Username:</b> {st.session_state.username.capitalize()}</p>
-            <p><b>Role:</b> {role}</p>
-            <p><b>Session:</b> Active</p>
-            <p><b>Last Login:</b> {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
+        <div style='font-size:13px;color:#94a3b8;'>
+            <p><b style='color:#e2e8f0;'>Username:</b> {st.session_state.username.capitalize()}</p>
+            <p><b style='color:#e2e8f0;'>Role:</b> {role}</p>
+            <p><b style='color:#e2e8f0;'>Session:</b> Active</p>
+            <p><b style='color:#e2e8f0;'>Last Login:</b> {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
         </div>
         """, unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
@@ -610,17 +784,17 @@ elif "Settings" in page:
     st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
     if st.button("💾  Save Settings", key="save_settings"):
         st.session_state.theme = theme_choice
-        # Re-inject updated theme CSS immediately
-        st.markdown(get_css(theme_choice), unsafe_allow_html=True)
-        st.success("✅ Settings saved! Theme applied — refresh the page if colours don't update instantly.")
+        st.success("✅ Settings saved! Theme applied.")
         st.rerun()
 
 # ── FOOTER ────────────────────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown(f"""
-<div style='text-align:center;color:#1e293b;font-size:11px;padding:8px 0;'>
+<div style='text-align:center;color:#334155;font-size:11px;padding:8px 0;'>
     🏢 TechLift Elevator Monitoring System · v4.0 · 
     Logged in as <b style='color:#00d4ff;'>{st.session_state.username.capitalize()}</b> · 
     {datetime.now().strftime('%Y-%m-%d %H:%M')} · © 2026 TechLift
 </div>
 """, unsafe_allow_html=True)
+
+
