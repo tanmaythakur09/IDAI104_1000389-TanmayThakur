@@ -42,7 +42,8 @@ def inject_css():
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* ── BASE ── */
-html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+html, body { font-family: 'Inter', sans-serif; }
+* { font-family: 'Inter', sans-serif; box-sizing: border-box; }
 .stApp {
     background: linear-gradient(135deg, #020817 0%, #0d1629 50%, #020817 100%) !important;
     color: #e2e8f0;
@@ -355,7 +356,6 @@ hr { border-color: rgba(0,212,255,0.1) !important; }
 
 /* ── SUBHEADERS ── */
 h2, h3 { color: #e2e8f0 !important; }
-[data-testid="stMarkdownContainer"] p { color: #94a3b8; }
 
 /* ── SUCCESS / ERROR / INFO messages ── */
 .stSuccess > div, .stInfo > div, .stWarning > div, .stError > div {
@@ -432,10 +432,12 @@ maint_count    = len(df[(df['vibration'] >= healthy_thr) & (df['vibration'] < cr
 critical_count = len(df[df['vibration'] >= critical_thr])
 healthy_pct    = healthy_count / len(df) * 100
 
+# ── ROLE (module-level so Settings page can access it) ───────────────────────
+role = "Administrator" if st.session_state.username == "admin" else "Senior Engineer" if st.session_state.username == "tanmay" else "Engineer"
+
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     initials = st.session_state.username[:2].upper()
-    role     = "Administrator" if st.session_state.username == "admin" else "Senior Engineer" if st.session_state.username == "tanmay" else "Engineer"
     st.markdown(f"""
     <div class='user-badge pulse'>
         <div class='user-avatar'>{initials}</div>
