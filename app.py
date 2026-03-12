@@ -39,27 +39,27 @@ USERS = {"admin": "elevate123", "tanmay": "1234", "engineer": "tech2024"}
 def inject_css():
     css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
 
 /* ── BASE ── */
-html, body { font-family: 'Inter', sans-serif; }
-* { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+html, body { font-family: 'Rajdhani', sans-serif; background-color: #020308; }
+* { font-family: 'Rajdhani', sans-serif; box-sizing: border-box; }
 .stApp {
-    background: linear-gradient(135deg, #020817 0%, #0d1629 50%, #020817 100%) !important;
-    color: #e2e8f0;
+    background: #020308 !important;
+    background-image: 
+        radial-gradient(circle at 10% 10%, rgba(0,255,255,0.05) 0%, transparent 20%),
+        radial-gradient(circle at 90% 90%, rgba(138,43,226,0.05) 0%, transparent 20%),
+        linear-gradient(rgba(0,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,255,0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+    color: #cbd5e1;
 }
 
 /* ── ANIMATED GRADIENT BG ── */
 .stApp::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background:
-        radial-gradient(ellipse at 20% 50%, rgba(0,212,255,0.04) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(79,142,247,0.05) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 80%, rgba(139,92,246,0.04) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
+    content: ''; box-shadow: inset 0 0 200px rgba(0,255,255,0.05);
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; z-index: 0;
 }
 
 /* ── HIDE STREAMLIT CHROME ── */
@@ -68,303 +68,229 @@ html, body { font-family: 'Inter', sans-serif; }
 
 /* ── SIDEBAR ── */
 section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0d1629 0%, #090f1e 100%) !important;
-    border-right: 1px solid rgba(0,212,255,0.15);
-    min-width: 260px !important;
+    background: rgba(3, 5, 12, 0.95) !important;
+    backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    border-right: 1px solid rgba(0, 255, 255, 0.2);
+    box-shadow: 2px 0 25px rgba(0, 255, 255, 0.05);
+    min-width: 270px !important;
 }
 section[data-testid="stSidebar"] * { color: #94a3b8 !important; }
-section[data-testid="stSidebar"] .block-container { padding: 1rem 0.8rem; }
 
 /* ── NAV RADIO ── */
 div[data-testid="stRadio"] > label { display: none; }
-div[data-testid="stRadio"] div[role="radiogroup"] { display: flex; flex-direction: column; gap: 4px; }
+div[data-testid="stRadio"] div[role="radiogroup"] { display: flex; flex-direction: column; gap: 8px; }
 div[data-testid="stRadio"] label {
-    background: rgba(0,212,255,0.04);
-    border: 1px solid rgba(0,212,255,0.12);
-    border-radius: 10px; padding: 10px 14px;
-    cursor: pointer; transition: all .25s ease;
-    font-weight: 500; font-size: 14px; letter-spacing: .02em;
-    display: flex !important; align-items: center; gap: 8px;
+    background: rgba(0, 255, 255, 0.02);
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    border-radius: 2px; padding: 12px 16px;
+    cursor: pointer; transition: all .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-weight: 600; font-size: 14px; letter-spacing: .1em; text-transform: uppercase;
+    position: relative; overflow: hidden; font-family: 'Orbitron', sans-serif;
+}
+div[data-testid="stRadio"] label::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: transparent; transition: all .3s ease;
 }
 div[data-testid="stRadio"] label:hover {
-    background: rgba(0,212,255,0.08);
-    border-color: rgba(0,212,255,0.4);
-    transform: translateX(4px);
+    background: rgba(0, 255, 255, 0.08); border-color: rgba(0, 255, 255, 0.3);
+    padding-left: 20px;
 }
 div[data-testid="stRadio"] label[data-selected="true"],
 div[data-testid="stRadio"] input:checked + div {
-    background: linear-gradient(90deg, rgba(0,212,255,0.18), rgba(79,142,247,0.1));
-    border-color: #00d4ff;
-    box-shadow: 0 0 12px rgba(0,212,255,0.2);
+    background: linear-gradient(90deg, rgba(0, 255, 255, 0.15), rgba(138, 43, 226, 0.05));
+    border-color: #0ff; box-shadow: inset 0 0 15px rgba(0, 255, 255, 0.1), 0 0 10px rgba(0,255,255,0.2);
+    color: #fff !important;
+}
+div[data-testid="stRadio"] label[data-selected="true"]::before,
+div[data-testid="stRadio"] input:checked + div::before {
+    background: #0ff; box-shadow: 0 0 12px #0ff;
 }
 
 /* ── GLASS CARDS ── */
 .glass-card {
-    background: rgba(255,255,255,0.04);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(0,212,255,0.15);
-    border-radius: 16px; padding: 24px; margin: 8px 0;
-    transition: transform .3s, box-shadow .3s;
-    animation: fadeInUp .5s ease forwards;
+    background: rgba(5, 8, 20, 0.6);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 255, 255, 0.15); border-radius: 4px;
+    padding: 24px; margin: 8px 0; position: relative;
+    box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.02), 0 5px 20px rgba(0,0,0,0.5);
+    transition: all .3s;
 }
-.glass-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(0,212,255,0.12), 0 0 0 1px rgba(0,212,255,0.2);
+.glass-card::after {
+    content: ''; position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
+    background: linear-gradient(45deg, transparent, rgba(0,255,255,0.2), transparent);
+    z-index: -1; opacity: 0; transition: opacity 0.3s;
 }
+.glass-card:hover { border-color: rgba(0, 255, 255, 0.5); box-shadow: 0 0 25px rgba(0, 255, 255, 0.08); }
+.glass-card:hover::after { opacity: 1; }
 
 /* ── METRIC CARDS ── */
 .metric-glass {
-    background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(79,142,247,0.07));
-    border: 1px solid rgba(0,212,255,0.2);
-    border-radius: 14px; padding: 20px 24px;
-    text-align: center; transition: all .3s;
-    animation: fadeInUp .5s ease forwards;
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.06), rgba(138, 43, 226, 0.02));
+    border: 1px solid rgba(0, 255, 255, 0.2); border-left: 4px solid #0ff;
+    border-radius: 2px; padding: 22px; position: relative;
+    text-align: left; overflow: hidden;
 }
-.metric-glass:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 28px rgba(0,212,255,0.18);
-    border-color: rgba(0,212,255,0.45);
+.metric-glass::before {
+    content:''; position: absolute; top:0; right:0; width:50px; height:100%;
+    background: linear-gradient(90deg, transparent, rgba(0,255,255,0.05));
 }
-.metric-glass .label {
-    font-size: 11px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: .1em;
-    color: #64748b; margin-bottom: 8px;
-}
+.metric-glass .label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .2em; color: #a5b4fc; margin-bottom: 8px; font-family: 'Orbitron', sans-serif;}
 .metric-glass .value {
-    font-size: 30px; font-weight: 800;
-    background: linear-gradient(135deg, #00d4ff, #4f8ef7);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text; line-height: 1.1;
+    font-size: 34px; font-weight: 700; font-family: 'Orbitron', sans-serif;
+    color: #fff; text-shadow: 0 0 15px rgba(0,255,255,0.6);
 }
-.metric-glass .sub { font-size: 11px; color: #64748b; margin-top: 6px; }
+.metric-glass .sub { font-size: 12px; color: #6366f1; margin-top: 8px; font-family: 'Rajdhani', sans-serif; }
 
 /* ── STATUS ALERTS ── */
-.alert-critical {
-    background: linear-gradient(135deg, rgba(239,68,68,.18), rgba(185,28,28,.12));
-    border: 1px solid rgba(239,68,68,.4); border-left: 4px solid #ef4444;
-    padding: 20px; border-radius: 12px; color: #fca5a5;
-    transition: all .3s; animation: fadeInUp .5s ease;
-}
-.alert-critical:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(239,68,68,.25); }
-.alert-warning {
-    background: linear-gradient(135deg, rgba(245,158,11,.18), rgba(180,83,9,.12));
-    border: 1px solid rgba(245,158,11,.4); border-left: 4px solid #f59e0b;
-    padding: 20px; border-radius: 12px; color: #fcd34d;
-    transition: all .3s; animation: fadeInUp .5s ease;
-}
-.alert-warning:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,.25); }
-.alert-healthy {
-    background: linear-gradient(135deg, rgba(16,185,129,.18), rgba(5,150,105,.12));
-    border: 1px solid rgba(16,185,129,.4); border-left: 4px solid #10b981;
-    padding: 20px; border-radius: 12px; color: #6ee7b7;
-    transition: all .3s; animation: fadeInUp .5s ease;
-}
-.alert-healthy:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16,185,129,.25); }
+.alert-critical { border-left: 4px solid #ff0044; background: rgba(255, 0, 68, 0.08); border: 1px solid rgba(255,0,68,0.3); padding: 20px; color: #ff0044; box-shadow: 0 0 15px rgba(255,0,68,0.2); font-family: 'Orbitron', sans-serif; text-transform:uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+.alert-warning { border-left: 4px solid #ffb703; background: rgba(255, 183, 3, 0.08); border: 1px solid rgba(255,183,3,0.3); padding: 20px; color: #ffb703; box-shadow: 0 0 15px rgba(255,183,3,0.2); font-family: 'Orbitron', sans-serif; text-transform:uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+.alert-healthy { border-left: 4px solid #00ffcc; background: rgba(0, 255, 204, 0.08); border: 1px solid rgba(0,255,204,0.3); padding: 20px; color: #00ffcc; box-shadow: 0 0 15px rgba(0,255,204,0.2); font-family: 'Orbitron', sans-serif; text-transform:uppercase; letter-spacing: .05em; margin-bottom: 12px; }
 
 /* ── PAGE HEADER ── */
 .page-header {
-    background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(79,142,247,0.06));
-    border: 1px solid rgba(0,212,255,0.18);
-    border-radius: 16px; padding: 28px 32px; margin-bottom: 24px;
-    position: relative; overflow: hidden;
-    animation: fadeInUp .4s ease forwards;
+    background: url('data:image/svg+xml;utf8,<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M0 40 L40 0" stroke="rgba(0,255,255,0.05)" stroke-width="1"/></svg>'), linear-gradient(90deg, rgba(4,6,16,0.9), rgba(4,6,16,0.4));
+    border: 1px solid rgba(0,255,255,0.1); border-bottom: 2px solid #0ff;
+    padding: 24px 32px; margin-bottom: 30px;
+    position: relative; border-radius: 4px;
 }
 .page-header::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, #00d4ff, #4f8ef7, transparent);
+    content: ''; position: absolute; left:-1px; top:-1px; width:15px; height:15px;
+    border-top: 2px solid #0ff; border-left: 2px solid #0ff;
 }
 .page-header h1 {
-    font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 700;
-    background: linear-gradient(135deg, #00d4ff 0%, #4f8ef7 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text; margin: 0 0 6px 0;
+    font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 700;
+    color: #fff; text-shadow: 0 0 15px rgba(0,255,255,0.6); margin: 0 0 8px 0;
+    text-transform: uppercase; letter-spacing: .1em;
 }
-.page-header p { color: #64748b; margin: 0; font-size: 13px; }
+.page-header p { color: #818cf8; margin: 0; font-size: 13px; letter-spacing: .15em; text-transform: uppercase; }
 
 /* ── USER BADGE ── */
 .user-badge {
-    background: linear-gradient(135deg, rgba(0,212,255,0.12), rgba(79,142,247,0.08));
-    border: 1px solid rgba(0,212,255,0.25); border-radius: 12px;
-    padding: 14px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+    background: rgba(0,0,0,0.6); border: 1px solid rgba(0,255,255,0.3);
+    padding: 12px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+    box-shadow: inset 0 0 15px rgba(0,255,255,0.05); border-radius: 2px;
 }
 .user-avatar {
-    width: 40px; height: 40px;
-    background: linear-gradient(135deg, #00d4ff, #4f8ef7);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 15px; font-weight: 700; color: #020817; flex-shrink: 0;
-    box-shadow: 0 0 12px rgba(0,212,255,0.4);
+    width: 44px; height: 44px;
+    background: transparent; border: 2px solid #0ff;
+    color: #0ff; display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 16px;
+    box-shadow: 0 0 10px rgba(0,255,255,0.2), inset 0 0 10px rgba(0,255,255,0.2);
 }
-.user-name { font-size: 14px; font-weight: 600; color: #e2e8f0 !important; }
-.user-role { font-size: 11px; color: #64748b !important; }
+.user-name { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 600; color: #fff !important; margin-bottom:2px;}
+.user-role { font-size: 11px; color: #0ff !important; text-transform: uppercase; letter-spacing: .2em; font-family: 'Rajdhani', sans-serif; }
 
 /* ── BUTTONS ── */
 .stButton > button {
-    background: linear-gradient(135deg, #00d4ff 0%, #4f8ef7 100%) !important;
-    color: #020817 !important; border: none !important;
-    border-radius: 10px !important; font-weight: 700 !important;
-    font-size: 14px !important; padding: 12px 24px !important;
-    width: 100% !important; transition: all .3s !important;
-    letter-spacing: .04em !important; text-transform: uppercase !important;
-    box-shadow: 0 4px 15px rgba(0,212,255,0.3) !important;
+    background: transparent !important;
+    color: #0ff !important; border: 1px solid #0ff !important;
+    border-radius: 2px !important; font-family: 'Orbitron', sans-serif !important;
+    font-weight: 600 !important; font-size: 13px !important; padding: 12px 24px !important;
+    width: 100% !important; transition: all .2s !important;
+    letter-spacing: .15em !important; text-transform: uppercase !important;
+    position: relative; overflow: hidden;
+    box-shadow: inset 0 0 15px rgba(0,255,255,0.05) !important;
 }
 .stButton > button:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 28px rgba(0,212,255,0.5) !important;
+    background: rgba(0, 255, 255, 0.1) !important; color: #fff !important;
+    box-shadow: 0 0 25px rgba(0,255,255,0.3), inset 0 0 20px rgba(0,255,255,0.2) !important;
+    text-shadow: 0 0 8px #fff !important;
 }
 
 /* ── TEXT INPUTS ── */
 .stTextInput > div > div > input {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(0,212,255,0.3) !important;
-    border-radius: 10px !important; color: #e2e8f0 !important;
-    padding: 12px 16px !important; font-size: 14px !important;
+    background: rgba(0,0,0,0.6) !important;
+    border: 1px solid rgba(0,255,255,0.2) !important; border-left: 3px solid #0ff !important;
+    border-radius: 2px !important; color: #0ff !important;
+    padding: 14px 16px !important; font-size: 15px !important; font-family: 'Rajdhani', sans-serif !important;
+    letter-spacing: .05em;
 }
 .stTextInput > div > div > input:focus {
-    border-color: #00d4ff !important;
-    box-shadow: 0 0 0 3px rgba(0,212,255,0.15) !important;
+    background: rgba(0,255,255,0.05) !important;
+    box-shadow: 0 0 20px rgba(0,255,255,0.1) !important;
 }
 
-/* ── LABELS (Fix for "etxt" / label text showing) ── */
-.stTextInput > label, .stSelectbox > label, .stSlider > label,
-.stNumberInput > label, .stDateInput > label, .stCheckbox > label,
-.stRadio > label, .stTextArea > label {
-    color: #94a3b8 !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.02em !important;
-}
-
-/* ── TABS ── */
-.stTabs [data-baseweb="tab-list"] {
-    background: rgba(0,212,255,0.04) !important;
-    border-radius: 12px !important; padding: 4px !important;
-    border: 1px solid rgba(0,212,255,0.1) !important;
-}
-.stTabs [data-baseweb="tab"] {
-    border-radius: 8px !important; color: #64748b !important;
-    font-weight: 500 !important;
-}
-.stTabs [aria-selected="true"] {
-    background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(79,142,247,0.15)) !important;
-    color: #00d4ff !important;
+/* ── LABELS ── */
+.stTextInput > label, .stSelectbox > label, .stSlider > label {
+    color: #93c5fd !important; font-family: 'Orbitron', sans-serif !important;
+    font-size: 11px !important; letter-spacing: .15em !important; text-transform: uppercase !important;
+    margin-bottom: 8px !important;
 }
 
 /* ── SLIDERS ── */
-.stSlider > div > div > div > div {
-    background: linear-gradient(90deg, #00d4ff, #4f8ef7) !important;
-}
-.stSlider [data-testid="stThumbValue"] { color: #00d4ff !important; }
+.stSlider > div > div > div > div { background: #0ff !important; box-shadow: 0 0 12px #0ff !important; }
+.stSlider [data-testid="stThumbValue"] { color: #00ffcc !important; font-family: 'Orbitron', sans-serif !important; }
 div[data-testid="stSlider"] > div > div > div[role="slider"] {
-    background: #00d4ff !important;
-    border: 2px solid #020817 !important;
-    box-shadow: 0 0 10px rgba(0,212,255,0.6) !important;
-    width: 18px !important; height: 18px !important;
-}
-
-/* ── SELECTBOX ── */
-.stSelectbox > div > div {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(0,212,255,0.25) !important;
-    border-radius: 10px !important; color: #e2e8f0 !important;
+    background: #03040a !important; border: 2px solid #0ff !important;
+    box-shadow: 0 0 12px #0ff !important; border-radius: 0 !important;
+    width: 16px !important; height: 16px !important; transform: rotate(45deg) !important;
 }
 
 /* ── DATAFRAME ── */
-.stDataFrame { border-radius: 12px; overflow: hidden; }
-.stDataFrame table { background: rgba(0,0,0,0.3) !important; }
-
-/* ── CHECKBOX ── */
-.stCheckbox > label { color: #94a3b8 !important; }
+.stDataFrame { border: 1px solid rgba(0,255,255,0.2); }
+.stDataFrame table { background: rgba(0,0,0,0.6) !important; color: #cbd5e1 !important; font-family: 'Rajdhani', sans-serif !important; }
 
 /* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #00d4ff, #4f8ef7);
-    border-radius: 3px;
-}
-
-/* ── NAV LABEL ── */
-.nav-section {
-    font-size: 9px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .15em; color: #334155 !important; padding: 8px 4px 4px;
-}
-
-/* ── SIDEBAR STAT CARDS ── */
-.sidebar-stat {
-    background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.12);
-    border-radius: 8px; padding: 10px 12px; text-align: center; margin: 4px 0;
-}
-.sidebar-stat .s-val { font-size: 18px; font-weight: 700; color: #00d4ff !important; }
-.sidebar-stat .s-lbl { font-size: 10px; color: #475569 !important; text-transform: uppercase; letter-spacing: .05em; }
-
-/* ── DIVIDER ── */
-hr { border-color: rgba(0,212,255,0.1) !important; }
-
-/* ── ANIMATIONS ── */
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0);    }
-}
-.fade-up { animation: fadeInUp .5s ease forwards; }
-
-@keyframes pulseGlow {
-    0%, 100% { box-shadow: 0 0 8px rgba(0,212,255,0.3);  }
-    50%       { box-shadow: 0 0 22px rgba(0,212,255,0.7); }
-}
-.pulse { animation: pulseGlow 2.5s ease-in-out infinite; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #020308; }
+::-webkit-scrollbar-thumb { background: #0ff; box-shadow: 0 0 10px #0ff; }
 
 /* ── LOGIN ── */
-.login-bg { min-height: 90vh; display: flex; align-items: center; justify-content: center; }
+.login-bg { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.login-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 80vh; margin-top: 5vh; }
 .login-card {
-    background: rgba(2,8,23,0.85);
-    backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-    border: 1px solid rgba(0,212,255,0.25); border-radius: 24px;
-    padding: 48px 44px; width: 100%; max-width: 440px;
-    box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 60px rgba(0,212,255,0.07);
-    position: relative; overflow: hidden;
+    background: rgba(4, 6, 16, 0.85);
+    backdrop-filter: blur(25px); border: 1px solid rgba(0,255,255,0.25);
+    padding: 50px 45px; width: 100%; max-width: 480px;
+    box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,255,255,0.03);
+    position: relative; overflow: hidden; border-radius: 2px;
 }
 .login-card::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, #00d4ff, #4f8ef7, transparent);
+    background: linear-gradient(90deg, transparent, #0ff, #fff, #0ff, transparent);
+    box-shadow: 0 0 15px #0ff;
 }
+.login-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(138,43,226,0.6), transparent);
+}
+.corner-tl { position: absolute; top:0; left:0; width: 20px; height: 20px; border-top: 2px solid #0ff; border-left: 2px solid #0ff; }
+.corner-br { position: absolute; bottom:0; right:0; width: 20px; height: 20px; border-bottom: 2px solid #0ff; border-right: 2px solid #0ff; }
+
 .login-title {
     text-align: center; font-family: 'Orbitron', sans-serif;
-    font-size: 22px; font-weight: 700;
-    background: linear-gradient(135deg, #00d4ff, #4f8ef7);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text; margin-bottom: 4px;
+    font-size: 34px; font-weight: 900; color: #fff;
+    text-shadow: 0 0 20px rgba(0,255,255,0.8);
+    letter-spacing: .15em; text-transform: uppercase; margin-bottom: 5px;
 }
 .login-subtitle {
-    text-align: center; font-size: 12px; color: #475569;
-    margin-bottom: 28px; letter-spacing: .06em; text-transform: uppercase;
+    text-align: center; font-size: 12px; color: #818cf8;
+    margin-bottom: 35px; letter-spacing: .3em; text-transform: uppercase; font-family: 'Rajdhani', sans-serif;
 }
-.login-icon { text-align: center; font-size: 52px; margin-bottom: 12px; filter: drop-shadow(0 0 16px rgba(0,212,255,0.6)); }
-.login-features { display: flex; justify-content: center; gap: 20px; margin-top: 24px; }
-.login-feat { text-align: center; font-size: 11px; color: #334155; }
-.login-feat .feat-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+.login-icon { text-align: center; font-size: 55px; margin-bottom: 10px; filter: drop-shadow(0 0 25px rgba(0,255,255,0.8)); }
 .tech-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.2);
-    border-radius: 20px; padding: 4px 12px; font-size: 10px;
-    color: #00d4ff; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 16px;
+    position: absolute; top: 20px; right: 20px;
+    background: rgba(0,255,204,0.1); border: 1px solid #00ffcc;
+    padding: 4px 10px; font-size: 9px; color: #00ffcc;
+    letter-spacing: .15em; font-family: 'Orbitron', sans-serif;
+    box-shadow: 0 0 10px rgba(0,255,204,0.2); border-radius: 2px;
 }
 .status-dot {
-    width: 6px; height: 6px; background: #10b981; border-radius: 50%;
-    box-shadow: 0 0 6px #10b981; display: inline-block; animation: pulseGlow 1.5s infinite;
+    width: 6px; height: 6px; background: #00ffcc; border-radius: 50%;
+    box-shadow: 0 0 10px #00ffcc; display: inline-block; animation: blink 1.2s infinite alternate;
 }
+@keyframes blink { from { opacity: 0.3; } to { opacity: 1; } }
+.login-features { display: flex; justify-content: center; gap: 30px; margin-top: 35px; border-top: 1px solid rgba(0,255,255,0.1); padding-top: 25px;}
+.login-feat { text-align: center; font-size: 10px; color: #6366f1; text-transform: uppercase; letter-spacing: .15em; font-family: 'Orbitron', sans-serif; }
+.login-feat .feat-icon { font-size: 24px; display: block; margin-bottom: 8px; color: #0ff; filter: drop-shadow(0 0 8px rgba(0,255,255,0.6)); }
 
-/* ── SUBHEADERS ── */
-h2, h3 { color: #e2e8f0 !important; }
-
-/* ── SUCCESS / ERROR / INFO messages ── */
-.stSuccess > div, .stInfo > div, .stWarning > div, .stError > div {
-    border-radius: 10px !important;
-    backdrop-filter: blur(10px);
-}
+/* MISC */
+h2, h3 { color: #fff !important; font-family: 'Orbitron', sans-serif !important; letter-spacing: .08em; text-transform: uppercase; }
+hr { border-color: rgba(0,255,255,0.1) !important; }
 </style>
 """
     st.markdown(css, unsafe_allow_html=True)
+
 
 inject_css()
 
@@ -374,44 +300,48 @@ def show_login():
     <style>
     section[data-testid="stSidebar"]{display:none!important;}
     header{display:none!important;}
+    .stApp { background: #020308 url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M100 0 L0 100" stroke="rgba(0,255,255,0.03)" stroke-width="1"/></svg>') !important; }
     </style>""", unsafe_allow_html=True)
 
-    _, col, _ = st.columns([1, 1.1, 1])
+    _, col, _ = st.columns([1, 1.3, 1])
     with col:
+        st.markdown("<div class='login-wrapper'>", unsafe_allow_html=True)
         st.markdown("""
-        <div style='margin-top:40px; text-align:center;'>
-            <div class='tech-badge'><span class='status-dot'></span> SYSTEM ONLINE · v4.0</div>
-        </div>
-        <div class='login-icon'>🏢</div>
-        <div class='login-title'>TechLift</div>
-        <div style='text-align:center;font-size:13px;color:#64748b;margin-bottom:4px;'>Elevator Monitoring System</div>
-        <div class='login-subtitle'>⚙️ Predictive Intelligence Platform · 📊 Real-Time Analytics</div>
+        <div class='login-card'>
+            <div class='corner-tl'></div>
+            <div class='corner-br'></div>
+            <div class='tech-badge'><span class='status-dot'></span> SYS.ONLINE</div>
+            <div class='login-icon'>💠</div>
+            <div class='login-title'>TechLift</div>
+            <div class='login-subtitle'>v4.0 // PREDICTIVE AI CORE</div>
         """, unsafe_allow_html=True)
 
         with st.form("login_form", clear_on_submit=False):
-            username = st.text_input("👤  Username", placeholder="Enter username")
-            password = st.text_input("🔐  Password", type="password", placeholder="Enter password")
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-            submitted = st.form_submit_button("⚡  ACCESS SYSTEM", use_container_width=True)
+            username = st.text_input("IDENTIFICATION [USER]", placeholder="Enter ID...")
+            password = st.text_input("AUTHORIZATION [PASS]", type="password", placeholder="Enter Passkey...")
+            st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+            submitted = st.form_submit_button("INITIALIZE UPLINK", use_container_width=True)
             if submitted:
                 if username in USERS and USERS[username] == password:
                     st.session_state.logged_in = True
                     st.session_state.username = username
                     st.rerun()
                 else:
-                    st.error("❌  Invalid credentials. Check demo accounts below.")
+                    st.error("ACCESS DENIED: Credentials mismatch.")
 
         st.markdown("""
-        <div class='login-features'>
-            <div class='login-feat'><span class='feat-icon'>🛡️</span>Secure Auth</div>
-            <div class='login-feat'><span class='feat-icon'>📡</span>Live Data</div>
-            <div class='login-feat'><span class='feat-icon'>🤖</span>AI Engine</div>
-        </div>
-        <div style='text-align:center;margin-top:20px;color:#1e293b;font-size:11px;'>
-            Demo: <code style='color:#00d4ff;'>admin</code> / <code style='color:#00d4ff;'>elevate123</code>
-            &nbsp;·&nbsp; <code style='color:#4f8ef7;'>tanmay</code> / <code style='color:#4f8ef7;'>1234</code>
+            <div class='login-features'>
+                <div class='login-feat'><span class='feat-icon'>🛡️</span>AES-256</div>
+                <div class='login-feat'><span class='feat-icon'>📡</span>UPLINK</div>
+                <div class='login-feat'><span class='feat-icon'>🧠</span>NEURAL NET</div>
+            </div>
+            <div style='text-align:center;margin-top:25px;color:#a5b4fc;font-size:11px;font-family: Rajdhani, sans-serif;letter-spacing: .08em;'>
+                OVERRIDE: [ <span style='color:#0ff;'>admin</span> : <span style='color:#0ff;'>elevate123</span> ] // [ <span style='color:#8a2be2;'>tanmay</span> : <span style='color:#8a2be2;'>1234</span> ]
+            </div>
         </div>
         """, unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
 
 if not st.session_state.logged_in:
     show_login()
