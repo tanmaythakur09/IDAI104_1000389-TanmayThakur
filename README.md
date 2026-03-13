@@ -381,11 +381,11 @@ This project is for educational purposes as part of the Mathematics for AI cours
 
 ## 👥 Authors
 
-- **Student Name:** [Your Name]
-- **Candidate ID:** [Your Registration Number]
-- **Course:** Mathematics for AI-I
-- **Institution:** WACP (World Academy of Career Professionals)
-- **Year:** 2024
+- **Student Name:** [Tanmay Kunal Thakur]
+- **Candidate ID:** [1000389]
+- **Course:** Mathematics for AI-I SA1
+- **Institution:** WACP (World Academy of Career Programmes)
+- **Year:** 2026
 
 ## 🙏 Acknowledgments
 
@@ -393,15 +393,8 @@ This project is for educational purposes as part of the Mathematics for AI cours
 - WACP faculty and instructors
 - Open-source communities (Streamlit, Pandas, Matplotlib)
 
-## 📬 Contact & Feedback
 
-For questions, suggestions, or feedback:
-- GitHub Issues: [Create an issue](https://github.com/YOUR_USERNAME/IDAI104-YourName/issues)
-- Email: [Your Email]
-- GitHub: [Your GitHub Profile]
-
----
 
 **Status:** ✅ Production Ready  
-**Last Updated:** 2024  
-**Version:** 1.0
+**Last Updated:** 2026 
+**Version:** 4.0
