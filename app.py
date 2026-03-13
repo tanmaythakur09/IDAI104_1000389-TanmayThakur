@@ -1045,9 +1045,9 @@ def styled_fig(fig, theme: str):
         if ax.get_title():
             ax.title.set_color(T1v); ax.title.set_fontsize(11)
         for sp in ["bottom", "left"]:
-            ax.spines[sp].set_color("rgba(148,163,184,0.18)"); ax.spines[sp].set_linewidth(0.7)
+            ax.spines[sp].set_color((0.580, 0.639, 0.722, 0.35)); ax.spines[sp].set_linewidth(0.7)
         ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
-        ax.grid(True, color="rgba(148,163,184,0.10)", alpha=1, linewidth=0.5, linestyle="--")
+        ax.grid(True, color=(0.580, 0.639, 0.722, 0.12), alpha=1, linewidth=0.5, linestyle="--")
     plt.tight_layout(pad=1.8)
 
 THM = st.session_state.theme   # shorthand used by chart calls
@@ -1187,7 +1187,7 @@ elif "Analytics" in page:
         ax.set_xlabel("Reading ID"); ax.set_ylabel("Vibration")
         t_val = _tokens(THM)
         ax.legend(loc="upper right", fontsize=8.5, facecolor=t_val["BG"],
-                  edgecolor="rgba(0,212,255,0.18)", labelcolor=t_val["T2"])
+                  edgecolor=(0.0, 0.831, 1.0, 0.25), labelcolor=t_val["T2"])
         styled_fig(fig, THM)
         st.pyplot(fig, transparent=True); plt.close()
 
@@ -1205,7 +1205,7 @@ elif "Analytics" in page:
         corr = fdf[["vibration","revolutions","humidity"]].corr()
         cmap = sns.diverging_palette(220, 20, as_cmap=True)
         sns.heatmap(corr, ax=ax, annot=True, fmt=".3f", cmap=cmap,
-                    linewidths=0.5, linecolor="rgba(148,163,184,0.15)",
+                    linewidths=0.5, linecolor=(0.580, 0.639, 0.722, 0.20),
                     cbar_kws={"shrink": 0.8},
                     annot_kws={"size": 11, "color": _tokens(THM)["T1"]})
         ax.set_title("Correlation Matrix", fontsize=12, pad=12)
@@ -1283,7 +1283,7 @@ elif "ML" in page:
         axes[0].set_xlabel("Actual Vibration"); axes[0].set_ylabel("Predicted Vibration")
         axes[0].set_title("Actual vs Predicted")
         t_v = _tokens(THM)
-        axes[0].legend(fontsize=9, facecolor=t_v["BG"], edgecolor="rgba(0,212,255,0.18)", labelcolor=t_v["T2"])
+        axes[0].legend(fontsize=9, facecolor=t_v["BG"], edgecolor=(0.0, 0.831, 1.0, 0.25), labelcolor=t_v["T2"])
 
         fi = pd.Series(mdl.feature_importances_, index=X.columns).sort_values(ascending=True)
         bars = axes[1].barh(fi.index, fi.values, color=[BL, CY], alpha=0.82)
