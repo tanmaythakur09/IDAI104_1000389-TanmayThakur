@@ -36,271 +36,279 @@ for k, v in [("logged_in", False), ("username", ""), ("theme", "dark"), ("page",
 USERS = {"admin": "elevate123", "tanmay": "1234", "engineer": "tech2024"}
 
 # ── INJECT CSS ────────────────────────────────────────────────────────────────
-def inject_css():
-    css = """
+def inject_css(theme="dark"):
+    # Common variables
+    accent_green = "#39ff14"
+    accent_green_muted = "rgba(57, 255, 20, 0.2)"
+    accent_green_glow = "rgba(57, 255, 20, 0.5)"
+    
+    if theme == "dark":
+        bg_color = "#0a0a0a"
+        bg_card = "rgba(15, 15, 15, 0.7)"
+        bg_input = "rgba(0,0,0,0.6)"
+        text_primary = "#e2e8f0"
+        text_secondary = "#94a3b8"
+        border_color = "rgba(57, 255, 20, 0.2)"
+        sidebar_bg = "rgba(8, 8, 8, 0.95)"
+    else:
+        bg_color = "#f0f2f5"
+        bg_card = "rgba(255, 255, 255, 0.85)"
+        bg_input = "rgba(255, 255, 255, 0.9)"
+        text_primary = "#1e293b"
+        text_secondary = "#475569"
+        border_color = "rgba(57, 255, 20, 0.4)"
+        sidebar_bg = "rgba(248, 250, 252, 0.95)"
+
+    css = f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
 
 /* ── BASE ── */
-html, body { font-family: 'Rajdhani', sans-serif; background-color: #020308; }
-* { font-family: 'Rajdhani', sans-serif; box-sizing: border-box; }
-.stApp {
-    background: #020308 !important;
+html, body {{ font-family: 'Rajdhani', sans-serif; background-color: {bg_color}; }}
+* {{ font-family: 'Rajdhani', sans-serif; box-sizing: border-box; }}
+.stApp {{
+    background: {bg_color} !important;
     background-image: 
-        radial-gradient(circle at 10% 10%, rgba(0,255,255,0.05) 0%, transparent 20%),
-        radial-gradient(circle at 90% 90%, rgba(138,43,226,0.05) 0%, transparent 20%),
-        linear-gradient(rgba(0,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,255,255,0.02) 1px, transparent 1px);
+        radial-gradient(circle at 10% 10%, {accent_green_muted} 0%, transparent 20%),
+        radial-gradient(circle at 90% 90%, rgba(0, 150, 255, 0.05) 0%, transparent 20%),
+        linear-gradient({accent_green_muted} 1px, transparent 1px),
+        linear-gradient(90deg, {accent_green_muted} 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
-    color: #cbd5e1;
-}
+    color: {text_primary};
+}}
 
 /* ── ANIMATED GRADIENT BG ── */
-.stApp::before {
-    content: ''; box-shadow: inset 0 0 200px rgba(0,255,255,0.05);
+.stApp::before {{
+    content: ''; box-shadow: inset 0 0 150px {accent_green_muted};
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     pointer-events: none; z-index: 0;
-}
+}}
 
 /* ── HIDE STREAMLIT CHROME ── */
-#MainMenu, footer, header { visibility: hidden; }
-.block-container { padding-top: 1.5rem !important; }
+#MainMenu, footer, header {{ visibility: hidden; }}
+.block-container {{ padding-top: 1.5rem !important; }}
 
 /* ── SIDEBAR ── */
-section[data-testid="stSidebar"] {
-    background: rgba(3, 5, 12, 0.95) !important;
+section[data-testid="stSidebar"] {{
+    background: {sidebar_bg} !important;
     backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-    border-right: 1px solid rgba(0, 255, 255, 0.2);
-    box-shadow: 2px 0 25px rgba(0, 255, 255, 0.05);
+    border-right: 1px solid {border_color};
+    box-shadow: 2px 0 25px {accent_green_muted};
     min-width: 270px !important;
-}
-section[data-testid="stSidebar"] * { color: #94a3b8 !important; }
+}}
+section[data-testid="stSidebar"] * {{ color: {text_secondary} !important; }}
 
 /* ── NAV RADIO ── */
-div[data-testid="stRadio"] > label { display: none; }
-div[data-testid="stRadio"] div[role="radiogroup"] { display: flex; flex-direction: column; gap: 8px; }
-div[data-testid="stRadio"] label {
-    background: rgba(0, 255, 255, 0.02);
-    border: 1px solid rgba(0, 255, 255, 0.1);
-    border-radius: 2px; padding: 12px 16px;
+div[data-testid="stRadio"] > label {{ display: none; }}
+div[data-testid="stRadio"] div[role="radiogroup"] {{ display: flex; flex-direction: column; gap: 8px; }}
+div[data-testid="stRadio"] label {{
+    background: transparent;
+    border: 1px solid {border_color};
+    border-radius: 4px; padding: 12px 16px;
     cursor: pointer; transition: all .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     font-weight: 600; font-size: 14px; letter-spacing: .1em; text-transform: uppercase;
     position: relative; overflow: hidden; font-family: 'Orbitron', sans-serif;
-}
-div[data-testid="stRadio"] label::before {
+}}
+div[data-testid="stRadio"] label::before {{
     content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
     background: transparent; transition: all .3s ease;
-}
-div[data-testid="stRadio"] label:hover {
-    background: rgba(0, 255, 255, 0.08); border-color: rgba(0, 255, 255, 0.3);
-    padding-left: 20px;
-}
+}}
+div[data-testid="stRadio"] label:hover {{
+    background: {accent_green_muted}; border-color: {accent_green};
+    padding-left: 20px; color: {text_primary} !important;
+}}
 div[data-testid="stRadio"] label[data-selected="true"],
-div[data-testid="stRadio"] input:checked + div {
-    background: linear-gradient(90deg, rgba(0, 255, 255, 0.15), rgba(138, 43, 226, 0.05));
-    border-color: #0ff; box-shadow: inset 0 0 15px rgba(0, 255, 255, 0.1), 0 0 10px rgba(0,255,255,0.2);
-    color: #fff !important;
-}
+div[data-testid="stRadio"] input:checked + div {{
+    background: linear-gradient(90deg, {accent_green_muted}, transparent);
+    border-color: {accent_green}; box-shadow: inset 0 0 15px {accent_green_muted}, 0 0 10px {accent_green_muted};
+    color: {text_primary} !important; font-weight: 700;
+}}
 div[data-testid="stRadio"] label[data-selected="true"]::before,
-div[data-testid="stRadio"] input:checked + div::before {
-    background: #0ff; box-shadow: 0 0 12px #0ff;
-}
+div[data-testid="stRadio"] input:checked + div::before {{
+    background: {accent_green}; box-shadow: 0 0 12px {accent_green};
+}}
 
 /* ── GLASS CARDS ── */
-.glass-card {
-    background: rgba(5, 8, 20, 0.6);
+.glass-card {{
+    background: {bg_card};
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(0, 255, 255, 0.15); border-radius: 4px;
+    border: 1px solid {border_color}; border-radius: 4px;
     padding: 24px; margin: 8px 0; position: relative;
-    box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.02), 0 5px 20px rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.02), 0 5px 20px rgba(0,0,0,0.1);
     transition: all .3s;
-}
-.glass-card::after {
+}}
+.glass-card::after {{
     content: ''; position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
-    background: linear-gradient(45deg, transparent, rgba(0,255,255,0.2), transparent);
+    background: linear-gradient(45deg, transparent, {accent_green_muted}, transparent);
     z-index: -1; opacity: 0; transition: opacity 0.3s;
-}
-.glass-card:hover { border-color: rgba(0, 255, 255, 0.5); box-shadow: 0 0 25px rgba(0, 255, 255, 0.08); }
-.glass-card:hover::after { opacity: 1; }
+}}
+.glass-card:hover {{ border-color: {accent_green}; box-shadow: 0 0 20px {accent_green_muted}; }}
+.glass-card:hover::after {{ opacity: 1; }}
 
 /* ── METRIC CARDS ── */
-.metric-glass {
-    background: linear-gradient(135deg, rgba(0, 255, 255, 0.06), rgba(138, 43, 226, 0.02));
-    border: 1px solid rgba(0, 255, 255, 0.2); border-left: 4px solid #0ff;
-    border-radius: 2px; padding: 22px; position: relative;
+.metric-glass {{
+    background: linear-gradient(135deg, {accent_green_muted}, transparent);
+    border: 1px solid {border_color}; border-left: 4px solid {accent_green};
+    border-radius: 4px; padding: 22px; position: relative;
     text-align: left; overflow: hidden;
-}
-.metric-glass::before {
+}}
+.metric-glass::before {{
     content:''; position: absolute; top:0; right:0; width:50px; height:100%;
-    background: linear-gradient(90deg, transparent, rgba(0,255,255,0.05));
-}
-.metric-glass .label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .2em; color: #a5b4fc; margin-bottom: 8px; font-family: 'Orbitron', sans-serif;}
-.metric-glass .value {
+    background: linear-gradient(90deg, transparent, {accent_green_muted});
+}}
+.metric-glass .label {{ font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .2em; color: {text_secondary}; margin-bottom: 8px; font-family: 'Orbitron', sans-serif;}}
+.metric-glass .value {{
     font-size: 34px; font-weight: 700; font-family: 'Orbitron', sans-serif;
-    color: #fff; text-shadow: 0 0 15px rgba(0,255,255,0.6);
-}
-.metric-glass .sub { font-size: 12px; color: #6366f1; margin-top: 8px; font-family: 'Rajdhani', sans-serif; }
+    color: {text_primary}; text-shadow: 0 0 10px {accent_green_muted};
+}}
+.metric-glass .sub {{ font-size: 12px; color: {text_secondary}; margin-top: 8px; font-family: 'Rajdhani', sans-serif; }}
 
 /* ── STATUS ALERTS ── */
-.alert-critical { border-left: 4px solid #ff0044; background: rgba(255, 0, 68, 0.08); border: 1px solid rgba(255,0,68,0.3); padding: 20px; color: #ff0044; box-shadow: 0 0 15px rgba(255,0,68,0.2); font-family: 'Orbitron', sans-serif; text-transform:uppercase; letter-spacing: .05em; margin-bottom: 12px; }
-.alert-warning { border-left: 4px solid #ffb703; background: rgba(255, 183, 3, 0.08); border: 1px solid rgba(255,183,3,0.3); padding: 20px; color: #ffb703; box-shadow: 0 0 15px rgba(255,183,3,0.2); font-family: 'Orbitron', sans-serif; text-transform:uppercase; letter-spacing: .05em; margin-bottom: 12px; }
-.alert-healthy { border-left: 4px solid #00ffcc; background: rgba(0, 255, 204, 0.08); border: 1px solid rgba(0,255,204,0.3); padding: 20px; color: #00ffcc; box-shadow: 0 0 15px rgba(0,255,204,0.2); font-family: 'Orbitron', sans-serif; text-transform:uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+.alert-critical {{ border-left: 4px solid #ff0044; background: rgba(255, 0, 68, 0.08); border: 1px solid rgba(255,0,68,0.3); padding: 20px; color: #ff0044; box-shadow: 0 0 15px rgba(255,0,68,0.2); font-family: 'Orbitron', sans-serif; text-transform:uppercase; letter-spacing: .05em; margin-bottom: 12px; }}
+.alert-warning {{ border-left: 4px solid #ffb703; background: rgba(255, 183, 3, 0.08); border: 1px solid rgba(255,183,3,0.3); padding: 20px; color: #ffb703; box-shadow: 0 0 15px rgba(255,183,3,0.2); font-family: 'Orbitron', sans-serif; text-transform:uppercase; letter-spacing: .05em; margin-bottom: 12px; }}
+.alert-healthy {{ border-left: 4px solid {accent_green}; background: {accent_green_muted}; border: 1px solid {border_color}; padding: 20px; color: {accent_green}; box-shadow: 0 0 15px {accent_green_muted}; font-family: 'Orbitron', sans-serif; text-transform:uppercase; letter-spacing: .05em; margin-bottom: 12px; }}
 
 /* ── PAGE HEADER ── */
-.page-header {
-    background: url('data:image/svg+xml;utf8,<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M0 40 L40 0" stroke="rgba(0,255,255,0.05)" stroke-width="1"/></svg>'), linear-gradient(90deg, rgba(4,6,16,0.9), rgba(4,6,16,0.4));
-    border: 1px solid rgba(0,255,255,0.1); border-bottom: 2px solid #0ff;
+.page-header {{
+    background: url('data:image/svg+xml;utf8,<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M0 40 L40 0" stroke="{accent_green_muted}" stroke-width="1"/></svg>'), linear-gradient(90deg, {bg_card}, transparent);
+    border: 1px solid {border_color}; border-bottom: 2px solid {accent_green};
     padding: 24px 32px; margin-bottom: 30px;
     position: relative; border-radius: 4px;
-}
-.page-header::before {
+}}
+.page-header::before {{
     content: ''; position: absolute; left:-1px; top:-1px; width:15px; height:15px;
-    border-top: 2px solid #0ff; border-left: 2px solid #0ff;
-}
-.page-header h1 {
+    border-top: 2px solid {accent_green}; border-left: 2px solid {accent_green};
+}}
+.page-header h1 {{
     font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 700;
-    color: #fff; text-shadow: 0 0 15px rgba(0,255,255,0.6); margin: 0 0 8px 0;
+    color: {text_primary}; text-shadow: 0 0 15px {accent_green_glow}; margin: 0 0 8px 0;
     text-transform: uppercase; letter-spacing: .1em;
-}
-.page-header p { color: #818cf8; margin: 0; font-size: 13px; letter-spacing: .15em; text-transform: uppercase; }
-
-/* ── USER BADGE ── */
-.user-badge {
-    background: rgba(0,0,0,0.6); border: 1px solid rgba(0,255,255,0.3);
-    padding: 12px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
-    box-shadow: inset 0 0 15px rgba(0,255,255,0.05); border-radius: 2px;
-}
-.user-avatar {
-    width: 44px; height: 44px;
-    background: transparent; border: 2px solid #0ff;
-    color: #0ff; display: flex; align-items: center; justify-content: center;
-    font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 16px;
-    box-shadow: 0 0 10px rgba(0,255,255,0.2), inset 0 0 10px rgba(0,255,255,0.2);
-}
-.user-name { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 600; color: #fff !important; margin-bottom:2px;}
-.user-role { font-size: 11px; color: #0ff !important; text-transform: uppercase; letter-spacing: .2em; font-family: 'Rajdhani', sans-serif; }
+}}
+.page-header p {{ color: {text_secondary}; margin: 0; font-size: 13px; letter-spacing: .15em; text-transform: uppercase; font-weight: 600; }}
 
 /* ── BUTTONS ── */
-.stButton > button {
+.stButton > button {{
     background: transparent !important;
-    color: #0ff !important; border: 1px solid #0ff !important;
-    border-radius: 2px !important; font-family: 'Orbitron', sans-serif !important;
+    color: {accent_green} !important; border: 1px solid {accent_green} !important;
+    border-radius: 4px !important; font-family: 'Orbitron', sans-serif !important;
     font-weight: 600 !important; font-size: 13px !important; padding: 12px 24px !important;
     width: 100% !important; transition: all .2s !important;
     letter-spacing: .15em !important; text-transform: uppercase !important;
     position: relative; overflow: hidden;
-    box-shadow: inset 0 0 15px rgba(0,255,255,0.05) !important;
-}
-.stButton > button:hover {
-    background: rgba(0, 255, 255, 0.1) !important; color: #fff !important;
-    box-shadow: 0 0 25px rgba(0,255,255,0.3), inset 0 0 20px rgba(0,255,255,0.2) !important;
-    text-shadow: 0 0 8px #fff !important;
-}
+    box-shadow: inset 0 0 10px {accent_green_muted} !important;
+}}
+.stButton > button:hover {{
+    background: {accent_green_muted} !important; color: {text_primary} !important;
+    box-shadow: 0 0 20px {accent_green_glow}, inset 0 0 15px {accent_green_muted} !important;
+    text-shadow: 0 0 5px {text_primary} !important;
+}}
 
 /* ── TEXT INPUTS ── */
-.stTextInput > div > div > input {
-    background: rgba(0,0,0,0.6) !important;
-    border: 1px solid rgba(0,255,255,0.2) !important; border-left: 3px solid #0ff !important;
-    border-radius: 2px !important; color: #0ff !important;
+.stTextInput > div > div > input {{
+    background: {bg_input} !important;
+    border: 1px solid {border_color} !important; border-left: 3px solid {accent_green} !important;
+    border-radius: 4px !important; color: {text_primary} !important;
     padding: 14px 16px !important; font-size: 15px !important; font-family: 'Rajdhani', sans-serif !important;
-    letter-spacing: .05em;
-}
-.stTextInput > div > div > input:focus {
-    background: rgba(0,255,255,0.05) !important;
-    box-shadow: 0 0 20px rgba(0,255,255,0.1) !important;
-}
+    letter-spacing: .05em; transition: all .3s;
+}}
+.stTextInput > div > div > input:focus {{
+    background: {bg_input} !important; border-color: {accent_green} !important;
+    box-shadow: 0 0 15px {accent_green_muted} !important;
+}}
 
 /* ── LABELS ── */
-.stTextInput > label, .stSelectbox > label, .stSlider > label {
-    color: #93c5fd !important; font-family: 'Orbitron', sans-serif !important;
+.stTextInput > label, .stSelectbox > label, .stSlider > label {{
+    color: {text_secondary} !important; font-family: 'Orbitron', sans-serif !important;
     font-size: 11px !important; letter-spacing: .15em !important; text-transform: uppercase !important;
-    margin-bottom: 8px !important;
-}
+    margin-bottom: 8px !important; font-weight: 600 !important;
+}}
 
 /* ── SLIDERS ── */
-.stSlider > div > div > div > div { background: #0ff !important; box-shadow: 0 0 12px #0ff !important; }
-.stSlider [data-testid="stThumbValue"] { color: #00ffcc !important; font-family: 'Orbitron', sans-serif !important; }
-div[data-testid="stSlider"] > div > div > div[role="slider"] {
-    background: #03040a !important; border: 2px solid #0ff !important;
-    box-shadow: 0 0 12px #0ff !important; border-radius: 0 !important;
-    width: 16px !important; height: 16px !important; transform: rotate(45deg) !important;
-}
+.stSlider > div > div > div > div {{ background: {accent_green} !important; box-shadow: 0 0 10px {accent_green} !important; }}
+.stSlider [data-testid="stThumbValue"] {{ color: {text_primary} !important; font-family: 'Orbitron', sans-serif !important; }}
+div[data-testid="stSlider"] > div > div > div[role="slider"] {{
+    background: {bg_color} !important; border: 2px solid {accent_green} !important;
+    box-shadow: 0 0 10px {accent_green} !important; border-radius: 50% !important;
+    width: 18px !important; height: 18px !important;
+}}
 
 /* ── DATAFRAME ── */
-.stDataFrame { border: 1px solid rgba(0,255,255,0.2); }
-.stDataFrame table { background: rgba(0,0,0,0.6) !important; color: #cbd5e1 !important; font-family: 'Rajdhani', sans-serif !important; }
+.stDataFrame {{ border: 1px solid {border_color}; border-radius: 4px; overflow: hidden; }}
+.stDataFrame table {{ background: {bg_input} !important; color: {text_primary} !important; font-family: 'Rajdhani', sans-serif !important; }}
+.stDataFrame th {{ background: {bg_card} !important; color: {text_secondary} !important; font-family: 'Orbitron', sans-serif !important; }}
 
 /* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #020308; }
-::-webkit-scrollbar-thumb { background: #0ff; box-shadow: 0 0 10px #0ff; }
+::-webkit-scrollbar {{ width: 8px; height: 8px; }}
+::-webkit-scrollbar-track {{ background: {bg_color}; }}
+::-webkit-scrollbar-thumb {{ background: {accent_green}; border-radius: 4px; }}
+::-webkit-scrollbar-thumb:hover {{ background: #00cc00; }}
 
 /* ── LOGIN ── */
-.login-bg { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-.login-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 80vh; margin-top: 5vh; }
-.login-card {
-    background: rgba(4, 6, 16, 0.85);
-    backdrop-filter: blur(25px); border: 1px solid rgba(0,255,255,0.25);
+.login-bg {{ min-height: 100vh; display: flex; align-items: center; justify-content: center; }}
+.login-wrapper {{ display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 80vh; margin-top: 5vh; }}
+.login-card {{
+    background: {bg_card};
+    backdrop-filter: blur(25px); border: 1px solid {border_color};
     padding: 50px 45px; width: 100%; max-width: 480px;
-    box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,255,255,0.03);
-    position: relative; overflow: hidden; border-radius: 2px;
-}
-.login-card::before {
+    box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 0 30px {accent_green_muted};
+    position: relative; overflow: hidden; border-radius: 4px;
+}}
+.login-card::before {{
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, #0ff, #fff, #0ff, transparent);
-    box-shadow: 0 0 15px #0ff;
-}
-.login-card::after {
-    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(138,43,226,0.6), transparent);
-}
-.corner-tl { position: absolute; top:0; left:0; width: 20px; height: 20px; border-top: 2px solid #0ff; border-left: 2px solid #0ff; }
-.corner-br { position: absolute; bottom:0; right:0; width: 20px; height: 20px; border-bottom: 2px solid #0ff; border-right: 2px solid #0ff; }
+    background: linear-gradient(90deg, transparent, {accent_green}, {text_primary}, {accent_green}, transparent);
+    box-shadow: 0 0 15px {accent_green};
+}}
+.corner-tl {{ position: absolute; top:0; left:0; width: 20px; height: 20px; border-top: 2px solid {accent_green}; border-left: 2px solid {accent_green}; }}
+.corner-br {{ position: absolute; bottom:0; right:0; width: 20px; height: 20px; border-bottom: 2px solid {accent_green}; border-right: 2px solid {accent_green}; }}
 
-.login-title {
+.login-title {{
     text-align: center; font-family: 'Orbitron', sans-serif;
-    font-size: 34px; font-weight: 900; color: #fff;
-    text-shadow: 0 0 20px rgba(0,255,255,0.8);
+    font-size: 36px; font-weight: 900; color: {text_primary};
+    text-shadow: 0 0 20px {accent_green_glow};
     letter-spacing: .15em; text-transform: uppercase; margin-bottom: 5px;
-}
-.login-subtitle {
-    text-align: center; font-size: 12px; color: #818cf8;
-    margin-bottom: 35px; letter-spacing: .3em; text-transform: uppercase; font-family: 'Rajdhani', sans-serif;
-}
-.login-icon { text-align: center; font-size: 55px; margin-bottom: 10px; filter: drop-shadow(0 0 25px rgba(0,255,255,0.8)); }
-.tech-badge {
+}}
+.login-subtitle {{
+    text-align: center; font-size: 13px; color: {text_secondary};
+    margin-bottom: 35px; letter-spacing: .3em; text-transform: uppercase; font-family: 'Rajdhani', sans-serif; font-weight: 600;
+}}
+.login-icon {{ text-align: center; font-size: 55px; margin-bottom: 10px; filter: drop-shadow(0 0 25px {accent_green_glow}); }}
+.tech-badge {{
     position: absolute; top: 20px; right: 20px;
-    background: rgba(0,255,204,0.1); border: 1px solid #00ffcc;
-    padding: 4px 10px; font-size: 9px; color: #00ffcc;
-    letter-spacing: .15em; font-family: 'Orbitron', sans-serif;
-    box-shadow: 0 0 10px rgba(0,255,204,0.2); border-radius: 2px;
-}
-.status-dot {
-    width: 6px; height: 6px; background: #00ffcc; border-radius: 50%;
-    box-shadow: 0 0 10px #00ffcc; display: inline-block; animation: blink 1.2s infinite alternate;
-}
-@keyframes blink { from { opacity: 0.3; } to { opacity: 1; } }
-.login-features { display: flex; justify-content: center; gap: 30px; margin-top: 35px; border-top: 1px solid rgba(0,255,255,0.1); padding-top: 25px;}
-.login-feat { text-align: center; font-size: 10px; color: #6366f1; text-transform: uppercase; letter-spacing: .15em; font-family: 'Orbitron', sans-serif; }
-.login-feat .feat-icon { font-size: 24px; display: block; margin-bottom: 8px; color: #0ff; filter: drop-shadow(0 0 8px rgba(0,255,255,0.6)); }
+    background: {accent_green_muted}; border: 1px solid {accent_green};
+    padding: 6px 12px; font-size: 10px; color: {accent_green};
+    letter-spacing: .15em; font-family: 'Orbitron', sans-serif; font-weight: 700;
+    box-shadow: 0 0 10px {accent_green_muted}; border-radius: 4px;
+}}
+.status-dot {{
+    width: 8px; height: 8px; background: {accent_green}; border-radius: 50%;
+    box-shadow: 0 0 12px {accent_green}; display: inline-block; animation: blink 1.2s infinite alternate; margin-right: 6px;
+}}
+@keyframes blink {{ from {{ opacity: 0.3; }} to {{ opacity: 1; }} }}
+.login-features {{ display: flex; justify-content: center; gap: 30px; margin-top: 35px; border-top: 1px solid {border_color}; padding-top: 25px;}}
+.login-feat {{ text-align: center; font-size: 11px; color: {text_secondary}; text-transform: uppercase; letter-spacing: .15em; font-family: 'Orbitron', sans-serif; font-weight: 600; }}
+.login-feat .feat-icon {{ font-size: 26px; display: block; margin-bottom: 8px; color: {accent_green}; filter: drop-shadow(0 0 10px {accent_green_glow}); }}
 
 /* MISC */
-h2, h3 { color: #fff !important; font-family: 'Orbitron', sans-serif !important; letter-spacing: .08em; text-transform: uppercase; }
-hr { border-color: rgba(0,255,255,0.1) !important; }
+h2, h3 {{ color: {text_primary} !important; font-family: 'Orbitron', sans-serif !important; letter-spacing: .08em; text-transform: uppercase; }}
+hr {{ border-color: {border_color} !important; }}
 </style>
 """
     st.markdown(css, unsafe_allow_html=True)
 
 
-inject_css()
+inject_css(st.session_state.theme)
 
 # ── LOGIN PAGE ────────────────────────────────────────────────────────────────
 def show_login():
-    st.markdown("""
+    theme = st.session_state.get('theme', 'dark')
+    bg_color = "#0a0a0a" if theme == "dark" else "#f0f2f5"
+    accent_green_muted = "rgba(57, 255, 20, 0.05)"
+    
+    st.markdown(f"""
     <style>
-    section[data-testid="stSidebar"]{display:none!important;}
-    header{display:none!important;}
-    .stApp { background: #020308 url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M100 0 L0 100" stroke="rgba(0,255,255,0.03)" stroke-width="1"/></svg>') !important; }
+    section[data-testid="stSidebar"]{{display:none!important;}}
+    header{{display:none!important;}}
+    .stApp {{ background: {bg_color} url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M100 0 L0 100" stroke="{accent_green_muted}" stroke-width="1"/></svg>') !important; }}
     </style>""", unsafe_allow_html=True)
 
     _, col, _ = st.columns([1, 1.3, 1])
@@ -421,10 +429,11 @@ def metric_glass(label, value, sub=""):
         <div class='sub'>{sub}</div>
     </div>"""
 
-def styled_fig(fig):
-    bg   = "#0a0e1a"
-    fg   = "#e2e8f0"
-    grid = "#1e293b"
+def styled_fig(fig, theme="dark"):
+    bg   = "#0a0a0a" if theme == "dark" else "#f0f2f5"
+    fg   = "#e2e8f0" if theme == "dark" else "#1e293b"
+    grid = "#1e293b" if theme == "dark" else "#cbd5e1"
+    
     fig.patch.set_facecolor(bg)
     for ax in fig.get_axes():
         ax.set_facecolor(bg)
@@ -505,35 +514,38 @@ elif "Analytics" in page:
 
     with tab1:
         fig, ax = plt.subplots(figsize=(14, 5))
-        ax.plot(fdf['ID'], fdf['vibration'], linewidth=1.5, color='#00d4ff', alpha=0.9, label='Vibration')
+        ax.plot(fdf['ID'], fdf['vibration'], linewidth=1.5, color='#39ff14', alpha=0.9, label='Vibration')
         ax.axhline(mean_vib,    color='#10b981', linestyle='--', linewidth=1.5, label=f'Avg: {mean_vib:.2f}')
         ax.axhline(healthy_thr, color='#f59e0b', linestyle='--', linewidth=1.5, label=f'Action: {healthy_thr:.2f}')
         ax.axhline(critical_thr,color='#ef4444', linestyle='--', linewidth=1.5, label=f'Critical: {critical_thr:.2f}')
-        ax.fill_between(fdf['ID'], fdf['vibration'], alpha=0.1, color='#00d4ff')
+        ax.fill_between(fdf['ID'], fdf['vibration'], alpha=0.1, color='#39ff14')
         ax.set_xlabel('Sample Index', fontsize=10); ax.set_ylabel('Vibration', fontsize=10)
         ax.set_title('Vibration Trends with Thresholds', fontsize=12, fontweight='bold')
-        ax.legend(facecolor='#0a0e1a', edgecolor='#1e293b', labelcolor='#e2e8f0', fontsize=9)
-        styled_fig(fig); st.pyplot(fig); plt.close()
+        legend_bg = '#0a0a0a' if st.session_state.theme == 'dark' else '#ffffff'
+        legend_fg = '#e2e8f0' if st.session_state.theme == 'dark' else '#1e293b'
+        ax.legend(facecolor=legend_bg, edgecolor='rgba(57, 255, 20, 0.4)', labelcolor=legend_fg, fontsize=9)
+        styled_fig(fig, st.session_state.theme); st.pyplot(fig); plt.close()
 
     with tab2:
         col1,col2 = st.columns(2)
         with col1:
             fig,ax = plt.subplots()
-            ax.hist(fdf['humidity'], bins=25, color='#00d4ff', edgecolor='#020817', alpha=0.8)
+            ax.hist(fdf['humidity'], bins=25, color='#39ff14', edgecolor='rgba(0,0,0,0.5)', alpha=0.8)
             ax.set_xlabel('Humidity (%)'); ax.set_ylabel('Frequency'); ax.set_title('Humidity Distribution')
-            styled_fig(fig); st.pyplot(fig); plt.close()
+            styled_fig(fig, st.session_state.theme); st.pyplot(fig); plt.close()
         with col2:
             fig,ax = plt.subplots()
-            ax.hist(fdf['revolutions'], bins=25, color='#4f8ef7', edgecolor='#020817', alpha=0.8)
+            ax.hist(fdf['revolutions'], bins=25, color='#10b981', edgecolor='rgba(0,0,0,0.5)', alpha=0.8)
             ax.set_xlabel('Revolutions'); ax.set_ylabel('Frequency'); ax.set_title('Door Usage Distribution')
-            styled_fig(fig); st.pyplot(fig); plt.close()
+            styled_fig(fig, st.session_state.theme); st.pyplot(fig); plt.close()
 
     with tab3:
         cols = ['revolutions','humidity','vibration','x1','x2','x3','x4','x5']
         fig,ax = plt.subplots(figsize=(10,8))
-        sns.heatmap(fdf[cols].corr(), annot=True, fmt='.2f', cmap='coolwarm', ax=ax,
-                    linecolor='#0a0e1a', linewidths=0.5)
-        styled_fig(fig); st.pyplot(fig); plt.close()
+        line_color = '#0a0a0a' if st.session_state.theme == 'dark' else '#ffffff'
+        sns.heatmap(fdf[cols].corr(), annot=True, fmt='.2f', cmap='Greens', ax=ax,
+                    linecolor=line_color, linewidths=0.5)
+        styled_fig(fig, st.session_state.theme); st.pyplot(fig); plt.close()
 
     with tab4:
         cols = ['revolutions','humidity','vibration','x1','x2','x3','x4','x5']
@@ -595,8 +607,8 @@ elif "ML" in page:
                     <div style='display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;color:#94a3b8;'>
                         <span>{feat}</span><span>{pct:.1f}%</span>
                     </div>
-                    <div style='background:rgba(0,212,255,0.1);border-radius:4px;height:6px;'>
-                        <div style='background:linear-gradient(90deg,#00d4ff,#4f8ef7);width:{pct:.0f}%;height:100%;border-radius:4px;box-shadow:0 0 6px rgba(0,212,255,0.4);'></div>
+                    <div style='background:rgba(57, 255, 20, 0.1);border-radius:4px;height:6px;'>
+                        <div style='background:linear-gradient(90deg,#10b981,#39ff14);width:{pct:.0f}%;height:100%;border-radius:4px;box-shadow:0 0 6px rgba(57, 255, 20, 0.4);'></div>
                     </div>
                 </div>""", unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
